@@ -175,6 +175,29 @@
       revealObserver.observe(el);
     });
 
+    // --- Spotlight Glow Tracking ---
+    document.querySelectorAll('.scenario-card').forEach(card => {
+      card.addEventListener('mousemove', (e) => {
+        const rect = card.getBoundingClientRect();
+        const x = e.clientX - rect.left;
+        const y = e.clientY - rect.top;
+        card.style.setProperty('--mouse-x', `${x}px`);
+        card.style.setProperty('--mouse-y', `${y}px`);
+      });
+    });
+
+    // --- Power-User Keyboard Shortcuts ---
+    window.addEventListener('keydown', (e) => {
+      if (e.target.tagName === 'INPUT' && e.target.type !== 'range' && e.target.type !== 'checkbox') return;
+      if ((e.metaKey || e.ctrlKey) && e.key === 'Enter') {
+        e.preventDefault();
+        calculateAndShowResults();
+      }
+      if (['1','2','3','4'].includes(e.key) && !e.metaKey && !e.ctrlKey) {
+        goToStep(parseInt(e.key));
+      }
+    });
+
   });
 
   // ===== VALIDATION =====
@@ -323,6 +346,7 @@
     goToStep(4);
     setTimeout(animateCountUp, 200);
     setTimeout(drawChart, 400);
+    setTimeout(fireConfetti, 600);
   };
 
   window.onWhatIfChange = function () {
@@ -432,6 +456,69 @@
         }
       }
     });
+
+    // --- Generate Smart Narrative ---
+    const narrativeEl = document.getElementById('smart-narrative-text');
+    const geoText = state.geoModifier === 1.0 ? "staying in the Metro" : (state.geoModifier === 0.75 ? "moving to a Tier-2 city" : "retiring in the countryside");
+    const healthText = state.healthcareRatio >= 0.25 ? "smartly buffering for 14% medical inflation" : "assuming standard healthcare costs";
+    const stepUpText = state.stepUpEnabled ? `leveraging your career growth with a ${Math.round(state.annualRaise*100)}% annual SIP step-up` : "using a flat monthly contribution";
+    
+    const narrativeString = `By planning to retire at ${state.whatIfRetireAge || state.retirementAge} and ${geoText}, you are optimizing your corpus. You are ${healthText} and ${stepUpText}. This \u201CLife-Proof\u201D strategy makes your goal highly achievable today.`;
+    
+    narrativeEl.innerHTML = '';
+    let charIdx = 0;
+    function typeWriter() {
+      if (charIdx < narrativeString.length) {
+        narrativeEl.innerHTML += narrativeString.charAt(charIdx);
+        charIdx++;
+        setTimeout(typeWriter, 20);
+      }
+    }
+    setTimeout(typeWriter, 800);
+
+    updateURLState();
+  }
+
+  // --- Dynamic URL Generation ---
+  function updateURLState() {
+    const params = new URLSearchParams();
+    params.set('age', state.currentAge);
+    params.set('retire', state.retirementAge);
+    params.set('exp', state.monthlyExpenses);
+    params.set('geo', state.geoModifier);
+    const newURL = `${window.location.pathname}?${params.toString()}`;
+    window.history.replaceState({}, '', newURL);
+  }
+
+  // --- Lightweight Vanilla JS Confetti ---
+  function fireConfetti() {
+    const colors = ['#224c87', '#2e7d32', '#ffd700', '#1976d2'];
+    for (let i = 0; i < 60; i++) {
+      const confetti = document.createElement('div');
+      confetti.style.position = 'fixed';
+      confetti.style.width = Math.random() * 10 + 5 + 'px';
+      confetti.style.height = Math.random() * 5 + 5 + 'px';
+      confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+      confetti.style.top = '-10px';
+      confetti.style.left = Math.random() * window.innerWidth + 'px';
+      confetti.style.opacity = Math.random() + 0.5;
+      confetti.style.transform = `rotate(${Math.random() * 360}deg)`;
+      confetti.style.zIndex = '9999';
+      confetti.style.pointerEvents = 'none';
+      document.body.appendChild(confetti);
+
+      const fallDuration = Math.random() * 3000 + 2000;
+      confetti.animate([
+        { transform: `translate3d(0, 0, 0) rotate(0deg)`, opacity: 1 },
+        { transform: `translate3d(${Math.random() * 200 - 100}px, ${window.innerHeight}px, 0) rotate(${Math.random() * 720}deg)`, opacity: 0 }
+      ], {
+        duration: fallDuration,
+        easing: 'cubic-bezier(.37,0,.63,1)',
+        fill: 'forwards'
+      });
+
+      setTimeout(() => confetti.remove(), fallDuration);
+    }
   }
 
   // ===== FINANCIAL FORMULAS =====
@@ -678,6 +765,36 @@
         }
       });
     });
+
+    // --- Canvas Hover Tooltip (Scrubber) ---
+    let tooltipEl = document.getElementById('chart-tooltip');
+    if (!tooltipEl) {
+      tooltipEl = document.createElement('div');
+      tooltipEl.id = 'chart-tooltip';
+      tooltipEl.style.cssText = 'position:absolute; background:#224c87; color:white; padding:8px 12px; border-radius:4px; font-size:12px; pointer-events:none; opacity:0; transition:opacity 0.2s; z-index:10; transform:translate(-50%, -100%); margin-top:-10px; font-family:Montserrat, sans-serif; box-shadow:0 4px 12px rgba(0,0,0,0.15);';
+      canvas.parentNode.style.position = 'relative';
+      canvas.parentNode.appendChild(tooltipEl);
+    }
+
+    canvas.addEventListener('mousemove', function handleChartHover(e) {
+      const rect = canvas.getBoundingClientRect();
+      const mouseX = e.clientX - rect.left;
+      if (mouseX >= PAD.left && mouseX <= PAD.left + chartW) {
+        const pct = (mouseX - PAD.left) / chartW;
+        const hoverYear = Math.round(pct * years);
+        const baselineSeries = seriesData[1];
+        const point = baselineSeries.points.find(p => p.year === hoverYear);
+        if (point) {
+          tooltipEl.style.opacity = '1';
+          tooltipEl.style.left = mouseX + 'px';
+          tooltipEl.style.top = (e.clientY - rect.top) + 'px';
+          tooltipEl.innerHTML = '<strong>Year ' + hoverYear + '</strong><br/>' + formatCurrency(Math.round(point.value));
+        }
+      } else {
+        tooltipEl.style.opacity = '0';
+      }
+    });
+    canvas.addEventListener('mouseleave', function () { tooltipEl.style.opacity = '0'; });
   }
 
   function formatCorpusShort(num) {
