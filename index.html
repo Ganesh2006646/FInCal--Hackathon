@@ -1,0 +1,532 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Life-Proof Retirement Calculator | HDFC Mutual Fund</title>
+  <meta name="description" content="Smart retirement planning for real life - healthcare, family, and flexible income. HDFC Mutual Fund Investor Education Initiative.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <!-- Skip Navigation -->
+  <a href="#calculator-main" class="skip-link">Skip to calculator</a>
+
+  <!-- ========== STEP 0: LANDING / HERO ========== -->
+  <section id="step-landing" class="step active" aria-labelledby="hero-heading">
+    <div class="hero-container">
+      <header class="hero-header">
+        <div class="logo-area">
+          <svg class="logo-icon" width="36" height="36" viewBox="0 0 36 36" fill="none" aria-hidden="true">
+            <rect width="36" height="36" rx="8" fill="#224c87"/>
+            <path d="M10 18h6v-8h4v8h6v4h-6v8h-4v-8h-6z" fill="#fff"/>
+          </svg>
+          <div>
+            <span class="logo-text">HDFC Mutual Fund</span>
+            <span class="logo-tagline">Investor Education Initiative</span>
+          </div>
+        </div>
+      </header>
+
+      <main class="hero-content" id="calculator-main">
+        <h1 id="hero-heading" class="hero-title">Life-Proof Retirement Planning</h1>
+        <p class="hero-subtitle">Smart planning for real life — healthcare, family, and flexible income</p>
+
+        <div class="problem-box">
+          <p>Standard calculators demand <strong>₹26,000/month</strong> SIPs. We help you start with <strong>₹8,500</strong> — growing realistically with your career.</p>
+        </div>
+
+        <button class="btn-primary btn-hero" onclick="goToStep(1)" aria-label="Start planning your future">
+          Start Planning Your Future
+          <svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M7 4l6 6-6 6" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
+
+        <div class="trust-indicators" role="list" aria-label="Trust indicators">
+          <div class="trust-item" role="listitem">
+            <svg width="32" height="32" viewBox="0 0 32 32" fill="none" aria-hidden="true"><path d="M16 3l10 5v7c0 6.6-4.3 12.7-10 14.7C10.3 27.7 6 21.6 6 15V8l10-5z" stroke="#224c87" stroke-width="2" fill="#e3f2fd"/><path d="M12 16l3 3 5-6" stroke="#224c87" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            <span>SEBI Compliant</span>
+          </div>
+          <div class="trust-item" role="listitem">
+            <svg width="32" height="32" viewBox="0 0 32 32" fill="none" aria-hidden="true"><rect x="8" y="14" width="16" height="12" rx="3" stroke="#224c87" stroke-width="2" fill="#e3f2fd"/><path d="M12 14v-4a4 4 0 018 0v4" stroke="#224c87" stroke-width="2" stroke-linecap="round"/><circle cx="16" cy="21" r="2" fill="#224c87"/></svg>
+            <span>Data Protected</span>
+          </div>
+          <div class="trust-item" role="listitem">
+            <svg width="32" height="32" viewBox="0 0 32 32" fill="none" aria-hidden="true"><rect x="5" y="6" width="22" height="20" rx="3" stroke="#224c87" stroke-width="2" fill="#e3f2fd"/><path d="M5 12h22M12 6v20" stroke="#224c87" stroke-width="2"/><path d="M17 18l2 2 4-4" stroke="#224c87" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            <span>Educational Tool</span>
+          </div>
+        </div>
+      </main>
+    </div>
+  </section>
+
+  <!-- ========== STEP 1: BASELINE INFORMATION ========== -->
+  <section id="step-1" class="step" role="form" aria-labelledby="step1-heading">
+    <div class="card-container">
+      <!-- Progress Indicator -->
+      <div class="progress-bar" role="progressbar" aria-valuenow="1" aria-valuemin="1" aria-valuemax="4" aria-label="Step 1 of 4">
+        <div class="progress-step active" data-step="1"><span class="step-num">1</span><span class="step-label">Basics</span></div>
+        <div class="progress-line"></div>
+        <div class="progress-step" data-step="2"><span class="step-num">2</span><span class="step-label">Healthcare</span></div>
+        <div class="progress-line"></div>
+        <div class="progress-step" data-step="3"><span class="step-num">3</span><span class="step-label">Income</span></div>
+        <div class="progress-line"></div>
+        <div class="progress-step" data-step="4"><span class="step-num">4</span><span class="step-label">Results</span></div>
+      </div>
+
+      <div class="card-header">
+        <span class="step-indicator">Step 1 of 4</span>
+        <h2 id="step1-heading">Let's Start with the Basics</h2>
+        <p class="card-subtitle">We'll build your personalized plan step by step</p>
+      </div>
+
+      <div class="form-body">
+        <!-- Current Age -->
+        <div class="input-group">
+          <label for="current-age" class="input-label">Your Current Age <span class="required" aria-label="required">*</span></label>
+          <input type="number" id="current-age" min="18" max="65" placeholder="e.g., 28" aria-describedby="age-hint" aria-required="true" value="28">
+          <span id="age-hint" class="helper-text">Between 18–65 years</span>
+        </div>
+
+        <!-- Retirement Age -->
+        <div class="input-group">
+          <label for="retirement-age" class="input-label">Target Retirement Age <span class="required" aria-label="required">*</span></label>
+          <input type="number" id="retirement-age" min="30" max="75" placeholder="e.g., 60" aria-describedby="retire-hint" aria-required="true" value="60">
+          <span id="retire-hint" class="helper-text">When you want to stop working</span>
+        </div>
+
+        <!-- Monthly Expenses -->
+        <div class="input-group">
+          <label for="monthly-expenses" class="input-label">Current Monthly Expenses <span class="required" aria-label="required">*</span></label>
+          <div class="slider-input-row">
+            <div class="slider-wrapper">
+              <input type="range" id="expenses-slider" min="10000" max="200000" step="5000" value="50000" aria-hidden="true" tabindex="-1">
+              <div class="slider-track-fill" id="expenses-track-fill"></div>
+            </div>
+            <div class="currency-input">
+              <span class="currency-prefix">₹</span>
+              <input type="number" id="monthly-expenses" min="10000" max="200000" step="1000" value="50000" aria-describedby="expense-hint">
+            </div>
+          </div>
+          <span id="expense-hint" class="helper-text">₹10,000 – ₹2,00,000</span>
+          <div class="inflation-preview" id="inflation-preview" aria-live="polite">
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><circle cx="8" cy="8" r="7" stroke="#1976d2" stroke-width="1.5"/><path d="M8 5v3M8 10v1" stroke="#1976d2" stroke-width="1.5" stroke-linecap="round"/></svg>
+            <span>At 6% inflation, this becomes <strong id="inflated-amount">₹2,87,000</strong>/month in <strong id="inflation-years">32</strong> years</span>
+          </div>
+        </div>
+      </div>
+
+      <button class="btn-primary btn-full" onclick="validateAndGoStep2()" aria-label="Next: Plan for Reality">
+        <span>Next: Plan for Reality</span>
+        <svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M7 4l6 6-6 6" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </button>
+    </div>
+  </section>
+
+  <!-- ========== STEP 2: REALITY SCENARIOS ========== -->
+  <section id="step-2" class="step" aria-labelledby="step2-heading">
+    <div class="wide-container">
+      <!-- Progress -->
+      <div class="progress-bar" role="progressbar" aria-valuenow="2" aria-valuemin="1" aria-valuemax="4" aria-label="Step 2 of 4">
+        <div class="progress-step completed" data-step="1"><span class="step-num">✓</span><span class="step-label">Basics</span></div>
+        <div class="progress-line filled"></div>
+        <div class="progress-step active" data-step="2"><span class="step-num">2</span><span class="step-label">Healthcare</span></div>
+        <div class="progress-line"></div>
+        <div class="progress-step" data-step="3"><span class="step-num">3</span><span class="step-label">Income</span></div>
+        <div class="progress-line"></div>
+        <div class="progress-step" data-step="4"><span class="step-num">4</span><span class="step-label">Results</span></div>
+      </div>
+
+      <div class="card-header wide-header">
+        <span class="step-indicator">Step 2 of 4</span>
+        <h2 id="step2-heading">Plan for Real-Life Scenarios</h2>
+        <p class="card-subtitle">These often-ignored factors drastically change your retirement needs</p>
+      </div>
+
+      <div class="split-panels">
+        <!-- LEFT: Healthcare -->
+        <div class="panel-card" id="panel-healthcare">
+          <div class="panel-icon red-icon">
+            <svg width="48" height="48" viewBox="0 0 48 48" fill="none" aria-hidden="true"><path d="M24 8v32M8 24h32" stroke="#da3832" stroke-width="4" stroke-linecap="round"/></svg>
+          </div>
+          <h3 class="panel-title">Healthcare & Family Support</h3>
+          <p class="panel-desc">What portion of your expenses goes to medical costs or supporting parents?</p>
+
+          <div class="input-group">
+            <label class="input-label">Healthcare/Dependent Expenses</label>
+            <div class="ratio-cards" role="radiogroup" aria-label="Healthcare dependency ratio">
+              <button class="ratio-card" role="radio" aria-checked="false" data-value="0" onclick="selectRatio(this, 0)">
+                <svg width="32" height="32" viewBox="0 0 32 32" fill="none" aria-hidden="true"><circle cx="16" cy="10" r="5" stroke="currentColor" stroke-width="2"/><path d="M8 28c0-4.4 3.6-8 8-8s8 3.6 8 8" stroke="currentColor" stroke-width="2"/></svg>
+                <strong>0%</strong>
+                <span>No dependents</span>
+              </button>
+              <button class="ratio-card selected" role="radio" aria-checked="true" data-value="25" onclick="selectRatio(this, 25)">
+                <svg width="32" height="32" viewBox="0 0 32 32" fill="none" aria-hidden="true"><circle cx="12" cy="10" r="4" stroke="currentColor" stroke-width="2"/><path d="M5 26c0-3.9 3.1-7 7-7s7 3.1 7 7" stroke="currentColor" stroke-width="2"/><circle cx="23" cy="12" r="3" stroke="currentColor" stroke-width="1.5" opacity="0.6"/><path d="M18 26c0-2.8 2.2-5 5-5s5 2.2 5 5" stroke="currentColor" stroke-width="1.5" opacity="0.6"/></svg>
+                <strong>25%</strong>
+                <span>Some support</span>
+              </button>
+              <button class="ratio-card" role="radio" aria-checked="false" data-value="40" onclick="selectRatio(this, 40)">
+                <svg width="32" height="32" viewBox="0 0 32 32" fill="none" aria-hidden="true"><circle cx="10" cy="10" r="4" stroke="currentColor" stroke-width="2"/><path d="M3 26c0-3.9 3.1-7 7-7s7 3.1 7 7" stroke="currentColor" stroke-width="2"/><circle cx="22" cy="8" r="3" stroke="currentColor" stroke-width="1.5" opacity="0.6"/><circle cx="22" cy="16" r="3" stroke="currentColor" stroke-width="1.5" opacity="0.6"/></svg>
+                <strong>40%</strong>
+                <span>Significant</span>
+              </button>
+              <button class="ratio-card" role="radio" aria-checked="false" data-value="50" onclick="selectRatio(this, 50)">
+                <svg width="32" height="32" viewBox="0 0 32 32" fill="none" aria-hidden="true"><circle cx="8" cy="10" r="3" stroke="currentColor" stroke-width="2"/><circle cx="16" cy="8" r="3" stroke="currentColor" stroke-width="2"/><circle cx="24" cy="10" r="3" stroke="currentColor" stroke-width="2"/><path d="M3 24c0-2.8 2.2-5 5-5s5 2.2 5 5M11 24c0-2.8 2.2-5 5-5s5 2.2 5 5M19 24c0-2.8 2.2-5 5-5s5 2.2 5 5" stroke="currentColor" stroke-width="1.5"/></svg>
+                <strong>50%</strong>
+                <span>Primary caregiver</span>
+              </button>
+            </div>
+          </div>
+
+          <div class="input-group">
+            <label for="medical-inflation" class="input-label">Expected Medical Inflation</label>
+            <div class="slider-value-display red-value" id="medical-inflation-display">14%</div>
+            <input type="range" id="medical-inflation" class="slider red-slider" min="8" max="16" step="1" value="14" oninput="updateMedicalInflation(this.value)">
+            <div class="slider-minmax"><span>8%</span><span>16%</span></div>
+          </div>
+
+          <div class="info-box warning-box">
+            <svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true"><circle cx="10" cy="10" r="9" stroke="#ff9800" stroke-width="1.5" fill="#fff3cd"/><path d="M10 6v5M10 13v1" stroke="#ff9800" stroke-width="1.5" stroke-linecap="round"/></svg>
+            <span>Medical costs in India rise 12–14% annually vs 6% general inflation</span>
+          </div>
+        </div>
+
+        <!-- RIGHT: Geo-Arbitrage -->
+        <div class="panel-card" id="panel-geo">
+          <div class="panel-icon blue-icon">
+            <svg width="48" height="48" viewBox="0 0 48 48" fill="none" aria-hidden="true"><path d="M24 4C17.4 4 12 9.4 12 16c0 10 12 24 12 24s12-14 12-24c0-6.6-5.4-12-12-12z" stroke="#224c87" stroke-width="3" fill="#e3f2fd"/><circle cx="24" cy="16" r="5" stroke="#224c87" stroke-width="2.5"/></svg>
+          </div>
+          <h3 class="panel-title">Retirement Destination</h3>
+          <p class="panel-desc">Where you retire dramatically impacts how much you need. Consider the cost difference.</p>
+
+          <div class="location-cards" role="radiogroup" aria-label="Retirement location">
+            <button class="location-card" role="radio" aria-checked="false" data-value="1.0" onclick="selectLocation(this, 1.0)">
+              <div class="loc-left">
+                <svg width="40" height="40" viewBox="0 0 40 40" fill="none" aria-hidden="true"><rect x="4" y="14" width="10" height="22" rx="1" stroke="#224c87" stroke-width="2"/><rect x="15" y="6" width="10" height="30" rx="1" stroke="#224c87" stroke-width="2"/><rect x="26" y="10" width="10" height="26" rx="1" stroke="#224c87" stroke-width="2"/></svg>
+                <div>
+                  <strong>Metro Cities</strong>
+                  <span class="loc-examples">Mumbai, Delhi, Bangalore</span>
+                </div>
+              </div>
+              <span class="cost-badge red-badge">100% Cost</span>
+            </button>
+            <button class="location-card selected" role="radio" aria-checked="true" data-value="0.75" onclick="selectLocation(this, 0.75)">
+              <div class="loc-left">
+                <svg width="40" height="40" viewBox="0 0 40 40" fill="none" aria-hidden="true"><rect x="6" y="16" width="12" height="20" rx="1" stroke="#224c87" stroke-width="2"/><rect x="22" y="12" width="12" height="24" rx="1" stroke="#224c87" stroke-width="2"/><path d="M2 36h36" stroke="#224c87" stroke-width="2"/></svg>
+                <div>
+                  <strong>Tier-2 Cities</strong>
+                  <span class="loc-examples">Pune, Kochi, Jaipur</span>
+                </div>
+              </div>
+              <span class="cost-badge orange-badge">75% Cost</span>
+            </button>
+            <button class="location-card" role="radio" aria-checked="false" data-value="0.50" onclick="selectLocation(this, 0.50)">
+              <div class="loc-left">
+                <svg width="40" height="40" viewBox="0 0 40 40" fill="none" aria-hidden="true"><path d="M8 36V18l12-10 12 10v18H8z" stroke="#224c87" stroke-width="2" fill="#e3f2fd"/><rect x="16" y="24" width="8" height="12" stroke="#224c87" stroke-width="2"/></svg>
+                <div>
+                  <strong>Hometown / Countryside</strong>
+                  <span class="loc-examples">Smaller towns, villages</span>
+                </div>
+              </div>
+              <span class="cost-badge green-badge">50% Cost</span>
+            </button>
+          </div>
+
+          <div class="impact-display" id="geo-impact" aria-live="polite">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="2" y="4" width="20" height="16" rx="2" stroke="#1976d2" stroke-width="1.5"/><path d="M2 10h20M8 4v16" stroke="#1976d2" stroke-width="1.5"/></svg>
+            <span id="geo-impact-text">Choosing Tier-2 reduces your required corpus by ~₹3.5 Lakhs</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="nav-buttons">
+        <button class="btn-secondary" onclick="goToStep(1)" aria-label="Back to basics">
+          <svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M13 4l-6 6 6 6" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          Back
+        </button>
+        <button class="btn-primary" onclick="goToStep(3)" aria-label="Next: Income Planning">
+          Next: Income Planning
+          <svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M7 4l6 6-6 6" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========== STEP 3: INCOME REALITY & STEP-UP SIP ========== -->
+  <section id="step-3" class="step" aria-labelledby="step3-heading">
+    <div class="card-container wider-card">
+      <!-- Progress -->
+      <div class="progress-bar" role="progressbar" aria-valuenow="3" aria-valuemin="1" aria-valuemax="4" aria-label="Step 3 of 4">
+        <div class="progress-step completed" data-step="1"><span class="step-num">✓</span><span class="step-label">Basics</span></div>
+        <div class="progress-line filled"></div>
+        <div class="progress-step completed" data-step="2"><span class="step-num">✓</span><span class="step-label">Healthcare</span></div>
+        <div class="progress-line filled"></div>
+        <div class="progress-step active" data-step="3"><span class="step-num">3</span><span class="step-label">Income</span></div>
+        <div class="progress-line"></div>
+        <div class="progress-step" data-step="4"><span class="step-num">4</span><span class="step-label">Results</span></div>
+      </div>
+
+      <div class="card-header">
+        <span class="step-indicator">Step 3 of 4</span>
+        <h2 id="step3-heading">Income Reality Check</h2>
+        <p class="card-subtitle">Most careers see 8–12% salary growth annually. Factor this in to make your starting SIP realistic.</p>
+      </div>
+
+      <div class="form-body">
+        <!-- Toggle -->
+        <div class="toggle-row">
+          <label for="stepup-toggle" class="toggle-label">Factor in annual salary growth</label>
+          <div class="toggle-switch">
+            <input type="checkbox" id="stepup-toggle" checked onchange="toggleStepUp(this.checked)">
+            <span class="toggle-track" role="presentation"></span>
+          </div>
+        </div>
+
+        <!-- Conditional Inputs -->
+        <div id="stepup-inputs" class="stepup-inputs show">
+          <div class="input-group">
+            <label for="annual-raise" class="input-label">Expected Annual Raise</label>
+            <span class="helper-text">How much does your salary typically grow each year?</span>
+            <div class="slider-value-display green-value" id="raise-display">10%</div>
+            <input type="range" id="annual-raise" class="slider green-slider" min="5" max="15" step="1" value="10" oninput="updateRaise(this.value)">
+            <div class="raise-badges">
+              <span class="raise-badge" data-val="5">5% Conservative</span>
+              <span class="raise-badge active" data-val="10">10% Typical</span>
+              <span class="raise-badge" data-val="15">15% Ambitious</span>
+            </div>
+          </div>
+
+          <div class="input-group">
+            <label for="sip-ceiling" class="input-label">Maximum SIP Cap</label>
+            <span class="helper-text">What's the highest percentage of salary you can sustainably invest?</span>
+            <div class="slider-value-display green-value" id="ceiling-display">40% of salary</div>
+            <input type="range" id="sip-ceiling" class="slider green-slider" min="20" max="50" step="5" value="40" oninput="updateCeiling(this.value)">
+            <div class="slider-minmax"><span>20%</span><span>50%</span></div>
+            <div class="ceiling-warning hidden" id="ceiling-warning" role="alert">
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M8 2l6.9 12H1.1L8 2z" stroke="#ff9800" stroke-width="1.5"/><path d="M8 7v3M8 12v1" stroke="#ff9800" stroke-width="1.5" stroke-linecap="round"/></svg>
+              Going above 45% may be challenging to sustain
+            </div>
+          </div>
+        </div>
+
+        <!-- Comparison Cards -->
+        <div class="comparison-section">
+          <h3 class="comparison-title">Your Starting Point vs Traditional Calculator</h3>
+          <div class="comparison-cards">
+            <div class="compare-card traditional">
+              <div class="compare-header">❌ Traditional Approach</div>
+              <div class="compare-amount" id="trad-sip">₹26,000<span>/mo</span></div>
+              <div class="compare-sub">Required from Day 1</div>
+              <div class="compare-note">(Never changes)</div>
+            </div>
+            <div class="compare-card lifeproof">
+              <div class="badge-achievable">Highly Achievable</div>
+              <div class="compare-header">✅ Life-Proof Approach</div>
+              <div class="compare-amount" id="lifeproof-sip">₹8,500<span>/mo</span></div>
+              <div class="compare-sub">Start today, grow <span id="compare-raise">10</span>%/year</div>
+              <div class="compare-timeline" id="compare-timeline">
+                <div>Year 5: ₹13,700</div>
+                <div>Year 10: ₹22,000</div>
+                <div>Year 15: ₹35,400 (capped)</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="nav-buttons">
+        <button class="btn-secondary" onclick="goToStep(2)" aria-label="Back to location">
+          <svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M13 4l-6 6 6 6" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          Back
+        </button>
+        <button class="btn-primary btn-glow" onclick="calculateAndShowResults()" aria-label="Calculate My Future">
+          Calculate My Future
+          <svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M7 4l6 6-6 6" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========== STEP 4: SCENARIO MATRIX DASHBOARD ========== -->
+  <section id="step-4" class="step" aria-labelledby="step4-heading">
+    <div class="dashboard-container">
+      <!-- Progress -->
+      <div class="progress-bar" role="progressbar" aria-valuenow="4" aria-valuemin="1" aria-valuemax="4" aria-label="Step 4 of 4">
+        <div class="progress-step completed" data-step="1"><span class="step-num">✓</span><span class="step-label">Basics</span></div>
+        <div class="progress-line filled"></div>
+        <div class="progress-step completed" data-step="2"><span class="step-num">✓</span><span class="step-label">Healthcare</span></div>
+        <div class="progress-line filled"></div>
+        <div class="progress-step completed" data-step="3"><span class="step-num">✓</span><span class="step-label">Income</span></div>
+        <div class="progress-line filled"></div>
+        <div class="progress-step active" data-step="4"><span class="step-num">4</span><span class="step-label">Results</span></div>
+      </div>
+
+      <div class="dashboard-header">
+        <h2 id="step4-heading">Your Life-Proof Retirement Plan</h2>
+        <p class="card-subtitle">Three scenarios based on market history — plan for reality</p>
+      </div>
+
+      <!-- What-If Controls -->
+      <div class="whatif-panel" aria-label="What-If controls">
+        <h3 class="whatif-title">What-If Controls</h3>
+        <div class="whatif-controls">
+          <div class="whatif-control">
+            <label for="whatif-sip">Starting SIP (₹/mo)</label>
+            <div class="whatif-value" id="whatif-sip-display">₹8,500</div>
+            <input type="range" id="whatif-sip" class="slider" min="2000" max="50000" step="500" value="8500" oninput="onWhatIfChange()">
+          </div>
+          <div class="whatif-control">
+            <label for="whatif-retire-age">Retirement Age</label>
+            <div class="whatif-value" id="whatif-retire-display">60</div>
+            <input type="range" id="whatif-retire-age" class="slider" min="40" max="75" step="1" value="60" oninput="onWhatIfChange()">
+          </div>
+        </div>
+      </div>
+
+      <!-- Summary Card -->
+      <div class="summary-card">
+        <svg class="summary-icon" width="48" height="48" viewBox="0 0 48 48" fill="none" aria-hidden="true"><circle cx="24" cy="24" r="20" stroke="#224c87" stroke-width="3"/><circle cx="24" cy="24" r="6" fill="#224c87"/><path d="M24 8v4M24 36v4M8 24h4M36 24h4" stroke="#224c87" stroke-width="2.5" stroke-linecap="round"/></svg>
+        <div class="summary-label">Required Starting SIP</div>
+        <div class="summary-amount" id="result-starting-sip">₹8,500/month</div>
+        <div class="summary-growth" id="result-growth-note">
+          <svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M4 14l4-4 3 3 5-7" stroke="#2e7d32" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          Growing 10% annually until capped at ₹34,000 in Year 15
+        </div>
+      </div>
+
+      <!-- 3-Column Scenario Grid -->
+      <div class="scenario-grid">
+        <!-- Conservative -->
+        <div class="scenario-card conservative">
+          <div class="scenario-top orange-top">
+            <span class="scenario-badge orange-bg">CONSERVATIVE</span>
+            <svg width="40" height="40" viewBox="0 0 40 40" fill="none" aria-hidden="true"><path d="M6 12l8 8 6-4 14 12" stroke="#ff9800" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            <h3>If Markets Struggle</h3>
+          </div>
+          <div class="scenario-body">
+            <div class="corpus-label">Retirement Corpus</div>
+            <div class="corpus-value orange-text" id="corpus-conservative">₹8.2 Crores</div>
+            <div class="gap-indicator red-gap">
+              <svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M10 2l8.7 15H1.3L10 2z" stroke="#c62828" stroke-width="1.5" fill="#ffebee"/><path d="M10 8v4M10 14v1" stroke="#c62828" stroke-width="1.5" stroke-linecap="round"/></svg>
+              <div>
+                <strong id="gap-conservative">Shortfall: ₹3.67 Cr below target</strong>
+                <span>Consider increasing SIP by 15%</span>
+              </div>
+            </div>
+            <div class="assumptions">
+              <div class="assumptions-title">Assumptions</div>
+              <ul>
+                <li>Pre-retirement return: <strong>6%</strong></li>
+                <li>Post-retirement return: 7%</li>
+                <li id="assumption-med-c">Healthcare inflation: 14%</li>
+                <li>Lifestyle inflation: 6%</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <!-- Baseline (Highlighted) -->
+        <div class="scenario-card baseline elevated">
+          <div class="ribbon">RECOMMENDED</div>
+          <div class="scenario-top blue-top">
+            <span class="scenario-badge blue-bg">BASELINE</span>
+            <svg width="40" height="40" viewBox="0 0 40 40" fill="none" aria-hidden="true"><circle cx="20" cy="20" r="14" stroke="#224c87" stroke-width="2.5"/><circle cx="20" cy="20" r="4" fill="#224c87"/><path d="M20 10v3M20 27v3M10 20h3M27 20h3" stroke="#224c87" stroke-width="2" stroke-linecap="round"/></svg>
+            <h3>Expected Performance</h3>
+          </div>
+          <div class="scenario-body">
+            <div class="corpus-label">Retirement Corpus</div>
+            <div class="corpus-value blue-text" id="corpus-baseline">₹11.9 Crores</div>
+            <div class="gap-indicator green-gap">
+              <svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true"><circle cx="10" cy="10" r="8" stroke="#2e7d32" stroke-width="1.5" fill="#e8f5e9"/><path d="M7 10l2 2 4-4" stroke="#2e7d32" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              <div>
+                <strong id="gap-baseline">✓ On Track to Goal</strong>
+                <span>This assumes typical market performance</span>
+              </div>
+            </div>
+            <div class="assumptions">
+              <div class="assumptions-title">Assumptions</div>
+              <ul>
+                <li>Pre-retirement return: <strong>12%</strong></li>
+                <li>Post-retirement return: 7%</li>
+                <li id="assumption-med-b">Healthcare inflation: 14%</li>
+                <li>Lifestyle inflation: 6%</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <!-- Optimistic -->
+        <div class="scenario-card optimistic">
+          <div class="scenario-top green-top">
+            <span class="scenario-badge green-bg">OPTIMISTIC</span>
+            <svg width="40" height="40" viewBox="0 0 40 40" fill="none" aria-hidden="true"><path d="M6 28l8-8 6 4 14-16" stroke="#2e7d32" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            <h3>If Markets Thrive</h3>
+          </div>
+          <div class="scenario-body">
+            <div class="corpus-label">Retirement Corpus</div>
+            <div class="corpus-value green-text" id="corpus-optimistic">₹17.4 Crores</div>
+            <div class="gap-indicator blue-gap">
+              <svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true"><circle cx="10" cy="10" r="8" stroke="#1976d2" stroke-width="1.5" fill="#e3f2fd"/><path d="M7 10l2 2 4-4" stroke="#1976d2" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              <div>
+                <strong id="gap-optimistic">Surplus: +₹5.5 Cr above target</strong>
+                <span>Extra cushion for legacy or extended travel</span>
+              </div>
+            </div>
+            <div class="assumptions">
+              <div class="assumptions-title">Assumptions</div>
+              <ul>
+                <li>Pre-retirement return: <strong>15%</strong></li>
+                <li>Post-retirement return: 7%</li>
+                <li id="assumption-med-o">Healthcare inflation: 14%</li>
+                <li>Lifestyle inflation: 6%</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Timeline -->
+      <div class="timeline-section">
+        <h3 class="timeline-title">Your Accumulation Journey</h3>
+        <p class="timeline-sub">How your corpus grows over the years (Baseline 12% scenario)</p>
+        <div class="timeline-chart" id="timeline-chart" role="img" aria-label="Chart showing corpus growth over time">
+          <canvas id="growthCanvas" width="1100" height="280"></canvas>
+        </div>
+        <div class="chart-legend">
+          <span class="legend-item"><span class="legend-dot orange-dot"></span>Conservative (6%)</span>
+          <span class="legend-item"><span class="legend-dot blue-dot"></span>Baseline (12%)</span>
+          <span class="legend-item"><span class="legend-dot green-dot"></span>Optimistic (15%)</span>
+        </div>
+      </div>
+
+      <!-- CTA Box -->
+      <div class="final-cta">
+        <svg width="64" height="64" viewBox="0 0 64 64" fill="none" aria-hidden="true"><circle cx="32" cy="32" r="28" fill="rgba(255,215,0,0.2)"/><path d="M32 12c-2 0-4 8-4 20s2 20 4 20 4-8 4-20-2-20-4-20z" fill="#ffd700"/><path d="M16 26c0-2 8-6 16-6s16 4 16 6-8 6-16 6-16-4-16-6z" fill="#ffd700" opacity="0.7"/></svg>
+        <h3>Ready to Take the Next Step?</h3>
+        <p>Explore HDFC Mutual Fund SIPs or speak with a financial advisor</p>
+        <div class="final-buttons">
+          <button class="btn-secondary-light" onclick="goToStep(0)">Start Over</button>
+          <button class="btn-gold">Speak to Advisor</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========== TOAST CONTAINER ========== -->
+  <div id="toast-container" class="toast-container" aria-live="polite" aria-relevant="additions"></div>
+
+  <!-- ========== STICKY DISCLAIMER FOOTER ========== -->
+  <footer class="disclaimer-footer" role="contentinfo" aria-label="Legal disclaimer">
+    <div class="disclaimer-content">
+      <svg class="disclaimer-icon" width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true"><circle cx="10" cy="10" r="9" stroke="#fff" stroke-width="1.5"/><path d="M10 6v5M10 13v1" stroke="#fff" stroke-width="1.5" stroke-linecap="round"/></svg>
+      <p class="disclaimer-text" id="disclaimer-text">This tool has been designed for information purposes only. Actual results may vary depending on various factors involved in capital market. Investor should not consider above as a recommendation for any schemes of HDFC Mutual Fund. Past performance may or may not be sustained in future and is not a guarantee of any future returns.</p>
+    </div>
+    <button class="disclaimer-toggle" id="disclaimer-toggle" onclick="toggleDisclaimer()" aria-label="Toggle disclaimer" aria-expanded="true">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M6 9l6 6 6-6" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </button>
+  </footer>
+
+  <script src="app.js"></script>
+</body>
+</html>
