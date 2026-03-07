@@ -30,6 +30,12 @@
     if (el) {
       el.classList.add('active');
       el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      // Focus the heading for screen readers
+      const heading = el.querySelector('h1, h2');
+      if (heading) {
+        heading.setAttribute('tabindex', '-1');
+        heading.focus();
+      }
     }
     if (stepNum === 1) syncStep1UI();
     if (stepNum === 3) updateComparisonCards();
@@ -94,6 +100,81 @@
     // Init slider styles for all range inputs
     document.querySelectorAll('input[type="range"]').forEach(s => updateSliderTrack(s));
     syncStep1UI();
+
+    // --- Preloader ---
+    window.addEventListener('load', function () {
+      const preloader = document.getElementById('preloader');
+      if (preloader) {
+        preloader.style.opacity = '0';
+        preloader.style.visibility = 'hidden';
+        setTimeout(function () { preloader.remove(); }, 600);
+      }
+    });
+
+    // --- Custom Cursor (desktop only) ---
+    if (window.matchMedia('(pointer: fine)').matches) {
+      const dot = document.querySelector('.cursor-dot');
+      const outline = document.querySelector('.cursor-outline');
+
+      window.addEventListener('mousemove', function (e) {
+        const posX = e.clientX, posY = e.clientY;
+        dot.style.left = posX + 'px';
+        dot.style.top = posY + 'px';
+        outline.animate(
+          { left: posX + 'px', top: posY + 'px' },
+          { duration: 400, fill: 'forwards' }
+        );
+      });
+
+      // Magnetic hover effect on interactive elements
+      document.querySelectorAll('button, .ratio-card, .location-card, input[type="range"]').forEach(function (el) {
+        el.addEventListener('mouseenter', function () { document.body.classList.add('cursor-hover'); });
+        el.addEventListener('mouseleave', function () { document.body.classList.remove('cursor-hover'); });
+      });
+    }
+
+    // --- 3D Card Tilt Effect ---
+    document.querySelectorAll('.scenario-card, .panel-card').forEach(function (card) {
+      card.addEventListener('mousemove', function (e) {
+        var rect = card.getBoundingClientRect();
+        var x = e.clientX - rect.left;
+        var y = e.clientY - rect.top;
+        var rotateX = ((y - rect.height / 2) / (rect.height / 2)) * -8;
+        var rotateY = ((x - rect.width / 2) / (rect.width / 2)) * 8;
+        card.style.transform = 'perspective(1000px) rotateX(' + rotateX + 'deg) rotateY(' + rotateY + 'deg) scale3d(1.02, 1.02, 1.02)';
+        card.style.transition = 'none';
+      });
+      card.addEventListener('mouseleave', function () {
+        card.style.transform = 'perspective(1000px) rotateX(0deg) rotateY(0deg) scale3d(1, 1, 1)';
+        card.style.transition = 'transform 0.5s ease-out';
+      });
+    });
+
+    // --- Hero Parallax ---
+    var heroContent = document.querySelector('.hero-content');
+    window.addEventListener('mousemove', function (e) {
+      if (window.scrollY > 500 || !heroContent) return;
+      var moveX = (e.clientX - window.innerWidth / 2) * -0.02;
+      var moveY = (e.clientY - window.innerHeight / 2) * -0.02;
+      heroContent.style.transform = 'translate(' + moveX + 'px, ' + moveY + 'px)';
+    });
+
+    // --- Entrance Reveals (Intersection Observer) ---
+    var revealObserver = new IntersectionObserver(function (entries) {
+      entries.forEach(function (entry) {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('active');
+          revealObserver.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.1, rootMargin: '0px 0px -50px 0px' });
+
+    document.querySelectorAll('.panel-card, .scenario-card, .timeline-section, .final-cta').forEach(function (el, index) {
+      el.classList.add('reveal-up');
+      el.style.transitionDelay = (index * 0.1) + 's';
+      revealObserver.observe(el);
+    });
+
   });
 
   // ===== VALIDATION =====
@@ -387,17 +468,21 @@
     return Math.round((low + high) / 2);
   }
 
-  // Accumulation with step-up
+  // Accumulation with step-up (with SIP ceiling enforcement)
   function calcStepUpAccumulation(initialSIP, annualReturn, years, stepUpRate) {
     const monthlyReturn = annualReturn / 12;
     let total = 0;
     let sip = initialSIP;
+    // Cap SIP at 5x starting amount to model real-world salary ceiling
+    const maxAbsoluteSIP = initialSIP * 5;
+
     for (let y = 1; y <= years; y++) {
       // FV of 12 months of SIP invested this year
       const yearFV = sip * ((Math.pow(1 + monthlyReturn, 12) - 1) / monthlyReturn) * (1 + monthlyReturn);
       const yearsRemaining = years - y;
       total += yearFV * Math.pow(1 + annualReturn, yearsRemaining);
-      sip = sip * (1 + stepUpRate);
+      // Apply the cap to the next year's SIP
+      sip = Math.min(sip * (1 + stepUpRate), maxAbsoluteSIP);
     }
     return total;
   }
