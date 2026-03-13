@@ -1,11 +1,173 @@
+@import '../styles.css';
+
 html,
 body {
   margin: 0;
   padding: 0;
   width: 100%;
   height: 100%;
+  font-family: Arial, Helvetica, sans-serif;
+  background: linear-gradient(160deg, #0a2f66 0%, #123f7f 38%, #1f5f9b 68%, #2f79b8 100%);
 }
 
 * {
   box-sizing: border-box;
+}
+
+.native-shell-root {
+  min-height: 100vh;
+}
+
+.native-shell-frame {
+  min-height: 100vh;
+}
+
+.native-shell-fallback {
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+  color: #eef6ff;
+}
+
+.judge-onboarding {
+  position: fixed;
+  inset: 0;
+  z-index: 12000;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+  background: rgba(4, 17, 38, 0.62);
+  backdrop-filter: blur(10px);
+  opacity: 0;
+  transition: opacity 220ms ease;
+}
+
+.judge-onboarding.visible {
+  opacity: 1;
+}
+
+.judge-onboarding-card {
+  width: min(760px, 100%);
+  padding: 30px;
+  border-radius: 24px;
+  background: linear-gradient(160deg, rgba(244, 250, 255, 0.97), rgba(232, 244, 255, 0.94));
+  border: 1px solid rgba(255, 255, 255, 0.72);
+  box-shadow: 0 24px 60px rgba(4, 17, 38, 0.28);
+  opacity: 0;
+  transform: translateY(26px) scale(0.985);
+  transition: transform 320ms cubic-bezier(0.16, 1, 0.3, 1), opacity 240ms ease;
+}
+
+.judge-onboarding.visible .judge-onboarding-card {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+}
+
+.judge-onboarding-eyebrow {
+  display: inline-block;
+  margin-bottom: 12px;
+  font-family: 'Montserrat', sans-serif;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: #224c87;
+}
+
+.judge-onboarding-card h2 {
+  margin: 0 0 12px;
+  font-family: 'Montserrat', sans-serif;
+  font-size: clamp(28px, 4vw, 38px);
+  line-height: 1.04;
+  letter-spacing: -0.04em;
+  color: #143255;
+}
+
+.judge-onboarding-card p {
+  margin: 0 0 22px;
+  color: #4d6482;
+  line-height: 1.65;
+  max-width: 58ch;
+}
+
+.judge-onboarding-points {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+  margin-bottom: 24px;
+}
+
+.judge-point {
+  padding: 16px 18px;
+  border-radius: 16px;
+  background: rgba(34, 76, 135, 0.07);
+  border: 1px solid rgba(34, 76, 135, 0.12);
+}
+
+.judge-point strong {
+  display: block;
+  margin-bottom: 6px;
+  color: #17365b;
+  font-family: 'Montserrat', sans-serif;
+  font-size: 15px;
+}
+
+.judge-point span {
+  color: #5e748f;
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+.judge-onboarding-actions {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  padding-top: 4px;
+}
+
+.judge-onboarding-eyebrow,
+.judge-onboarding-card h2,
+.judge-onboarding-card p,
+.judge-point,
+.judge-onboarding-actions {
+  opacity: 0;
+  transform: translateY(14px);
+  transition: transform 300ms cubic-bezier(0.16, 1, 0.3, 1), opacity 240ms ease;
+}
+
+.judge-onboarding.visible .judge-onboarding-eyebrow,
+.judge-onboarding.visible .judge-onboarding-card h2,
+.judge-onboarding.visible .judge-onboarding-card p,
+.judge-onboarding.visible .judge-point,
+.judge-onboarding.visible .judge-onboarding-actions {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.judge-onboarding.visible .judge-onboarding-eyebrow { transition-delay: 70ms; }
+.judge-onboarding.visible .judge-onboarding-card h2 { transition-delay: 110ms; }
+.judge-onboarding.visible .judge-onboarding-card p { transition-delay: 150ms; }
+.judge-onboarding.visible .judge-point:nth-child(1) { transition-delay: 190ms; }
+.judge-onboarding.visible .judge-point:nth-child(2) { transition-delay: 230ms; }
+.judge-onboarding.visible .judge-point:nth-child(3) { transition-delay: 270ms; }
+.judge-onboarding.visible .judge-onboarding-actions { transition-delay: 320ms; }
+
+.judge-onboarding-actions .btn-primary,
+.judge-onboarding-actions .btn-secondary,
+.judge-onboarding-actions .btn-secondary-light {
+  min-width: 180px;
+}
+
+@media (max-width: 768px) {
+  .judge-onboarding-points {
+    grid-template-columns: 1fr;
+  }
+
+  .judge-onboarding-card {
+    padding: 24px;
+  }
+
+  .judge-onboarding-actions {
+    flex-direction: column;
+  }
 }

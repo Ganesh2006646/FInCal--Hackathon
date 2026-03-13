@@ -7,6 +7,9 @@
 
   let audioCtx = null;
   let journeyTimer = null;
+  let narrativeTimer = null;
+  let narrativeSequence = 0;
+  let initialized = false;
 
   // ===== STATE =====
   const state = {
@@ -30,6 +33,8 @@
     whatIfRetireAge: null,
     whatIfPostRetirementReturn: null,
     whatIfRetirementDuration: null,
+    planSnapshots: { A: null, B: null },
+    demoTimers: [],
   };
 
   function prefersReducedMotion() {
@@ -39,6 +44,33 @@
   function announceStatus(message) {
     const statusEl = document.getElementById('form-status');
     if (statusEl) statusEl.textContent = message;
+  }
+
+  function getWhatIfSnapshot() {
+    return {
+      sip: parseInt(document.getElementById('whatif-sip')?.value || 0),
+      retireAge: parseInt(document.getElementById('whatif-retire-age')?.value || state.retirementAge),
+      postReturn: parseFloat(document.getElementById('whatif-post-return')?.value || state.postRetirementReturn * 100),
+      retirementYears: parseInt(document.getElementById('whatif-retirement-years')?.value || state.retirementDuration),
+      baselineReturn: parseFloat(document.getElementById('whatif-baseline-return')?.value || state.baselineReturn * 100),
+      lifestyleInflation: parseFloat(document.getElementById('whatif-lifestyle-inflation')?.value || state.lifestyleInflation * 100),
+      geoModifier: state.geoModifier,
+      medicalInflation: state.medicalInflation * 100,
+    };
+  }
+
+  function setRangeValue(id, value, formatter) {
+    const el = document.getElementById(id);
+    if (!el) return;
+    const bounded = Math.min(parseFloat(el.max), Math.max(parseFloat(el.min), value));
+    el.value = bounded;
+    if (formatter) formatter(bounded);
+    updateSliderTrack(el);
+  }
+
+  function applyLocationModifier(modifier) {
+    const match = Array.from(document.querySelectorAll('.location-card')).find(card => parseFloat(card.getAttribute('data-value')) === modifier);
+    if (match) selectLocation(match, modifier);
   }
 
   function setFieldError(inputId, message) {
@@ -109,8 +141,10 @@
     document.getElementById('inflation-years').textContent = years;
   }
 
-  // Wire Step 1 inputs
-  document.addEventListener('DOMContentLoaded', function () {
+  function initApp() {
+    if (initialized) return;
+    initialized = true;
+
     const ageInput = document.getElementById('current-age');
     const retireInput = document.getElementById('retirement-age');
     const expenseInput = document.getElementById('monthly-expenses');
@@ -165,8 +199,14 @@
         goToStep(parseInt(e.key));
       }
     });
+  }
 
-  });
+  window.__fincalInit = initApp;
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initApp);
+  } else {
+    initApp();
+  }
 
   // ===== VALIDATION =====
   window.validateAndGoStep2 = function () {
@@ -364,6 +404,7 @@
   };
 
   window.onWhatIfChange = function () {
+    const previousSnapshot = getWhatIfSnapshot();
     const sipVal = parseInt(document.getElementById('whatif-sip').value);
     const retireVal = parseInt(document.getElementById('whatif-retire-age').value);
     const postReturnVal = parseFloat(document.getElementById('whatif-post-return').value);
@@ -399,6 +440,38 @@
     runFullCalculation();
     drawChart();
     updateEverydayTranslator();
+    updateDeltaSummary(previousSnapshot, getWhatIfSnapshot());
+  };
+
+  window.applyQuickAdjustment = function (type) {
+    const previousSnapshot = getWhatIfSnapshot();
+    if (type === 'sip-plus') {
+      setRangeValue('whatif-sip', (parseInt(document.getElementById('whatif-sip').value) || 0) + 1000);
+    } else if (type === 'retire-later') {
+      setRangeValue('whatif-retire-age', (parseInt(document.getElementById('whatif-retire-age').value) || state.retirementAge) + 3);
+    } else if (type === 'tier2') {
+      applyLocationModifier(0.75);
+    } else if (type === 'return-down') {
+      setRangeValue('whatif-baseline-return', (parseFloat(document.getElementById('whatif-baseline-return').value) || 0) - 1);
+    } else if (type === 'medical-up') {
+      updateMedicalInflation(16);
+      const medSlider = document.getElementById('medical-inflation');
+      if (medSlider) { medSlider.value = 16; updateSliderTrack(medSlider); }
+    } else if (type === 'reset') {
+      setRangeValue('whatif-retire-age', state.retirementAge);
+      setRangeValue('whatif-post-return', state.postRetirementReturn * 100);
+      setRangeValue('whatif-retirement-years', state.retirementDuration);
+      setRangeValue('whatif-conservative-return', 6);
+      setRangeValue('whatif-baseline-return', 12);
+      setRangeValue('whatif-optimistic-return', 15);
+      setRangeValue('whatif-lifestyle-inflation', 6);
+      updateMedicalInflation(14);
+      const medSlider = document.getElementById('medical-inflation');
+      if (medSlider) { medSlider.value = 14; updateSliderTrack(medSlider); }
+      applyLocationModifier(0.75);
+    }
+    onWhatIfChange();
+    updateDeltaSummary(previousSnapshot, getWhatIfSnapshot());
   };
 
   function runFullCalculation() {
@@ -514,6 +587,8 @@
     document.getElementById('assumption-pre-b').innerHTML = 'Pre-retirement return: <strong>' + (state.baselineReturn * 100).toFixed(1) + '%</strong>';
     document.getElementById('assumption-pre-o').innerHTML = 'Pre-retirement return: <strong>' + (state.optimisticReturn * 100).toFixed(1) + '%</strong>';
 
+    const scenarioResults = {};
+
     // Calculate each scenario
     scenarios.forEach(sc => {
       let accumulated;
@@ -528,6 +603,7 @@
 
       corpusEl.setAttribute('data-target', accumulated);
       corpusEl.textContent = formatCorpus(accumulated);
+      scenarioResults[sc.id] = accumulated;
 
       const diff = accumulated - targetCorpus;
       if (sc.id === 'conservative') {
@@ -562,6 +638,12 @@
     const narrativeString = `By planning to retire at ${state.whatIfRetireAge || state.retirementAge} and ${geoText}, you are shaping a realistic retirement path. You are ${healthText} and ${stepUpText}. This \u201CLife-Proof\u201D view is illustrative and helps you compare trade-offs responsibly.`;
     
     narrativeEl.innerHTML = '';
+    if (narrativeTimer) {
+      clearTimeout(narrativeTimer);
+      narrativeTimer = null;
+    }
+    narrativeSequence += 1;
+    const currentSequence = narrativeSequence;
     if (prefersReducedMotion()) {
       narrativeEl.textContent = narrativeString;
       updateURLState();
@@ -571,18 +653,203 @@
     }
     let charIdx = 0;
     function typeWriter() {
+      if (currentSequence !== narrativeSequence) return;
       if (charIdx < narrativeString.length) {
         narrativeEl.innerHTML += narrativeString.charAt(charIdx);
         charIdx++;
-        setTimeout(typeWriter, 20);
+        narrativeTimer = setTimeout(typeWriter, 20);
       }
     }
-    setTimeout(typeWriter, 800);
+    narrativeTimer = setTimeout(typeWriter, 180);
 
     updateURLState();
     updateEverydayTranslator();
     updateInsightStrip(targetCorpus, startingSIP, years);
+    updateAffordabilityLens(startingSIP, targetCorpus);
+    updateStressTestCards();
+    updateMilestoneStory();
+    updateSnapshotDiff();
   }
+
+  function updateAffordabilityLens(startingSIP, targetCorpus) {
+    const shareEl = document.getElementById('affordability-share');
+    const nextYearEl = document.getElementById('affordability-next-year');
+    const targetEl = document.getElementById('affordability-target');
+    if (!shareEl || !nextYearEl || !targetEl) return;
+
+    const share = (startingSIP / Math.max(1, state.monthlyExpenses)) * 100;
+    const nextYear = state.stepUpEnabled ? startingSIP * (1 + state.annualRaise) : startingSIP;
+    shareEl.textContent = share.toFixed(0) + '%';
+    nextYearEl.textContent = formatCurrency(Math.round(nextYear)) + '/mo';
+    targetEl.textContent = formatCorpus(targetCorpus);
+  }
+
+  function evaluatePlan(overrides) {
+    const currentRetireAge = overrides.retireAge ?? (state.whatIfRetireAge || state.retirementAge);
+    const years = currentRetireAge - state.currentAge;
+    const annualExpense = state.monthlyExpenses * 12;
+    const lifestyleInflation = overrides.lifestyleInflation ?? state.lifestyleInflation;
+    const medicalInflation = overrides.medicalInflation ?? state.medicalInflation;
+    const geoModifier = overrides.geoModifier ?? state.geoModifier;
+    const postReturn = overrides.postReturn ?? (state.whatIfPostRetirementReturn || state.postRetirementReturn);
+    const retirementYears = overrides.retirementYears ?? (state.whatIfRetirementDuration || state.retirementDuration);
+    const conservativeReturn = overrides.conservativeReturn ?? state.conservativeReturn;
+    const baselineReturn = overrides.baselineReturn ?? state.baselineReturn;
+    const optimisticReturn = overrides.optimisticReturn ?? state.optimisticReturn;
+
+    const futureExpense = calcFutureExpense(annualExpense, state.healthcareRatio, lifestyleInflation, medicalInflation, years);
+    const targetCorpus = calcCorpus(futureExpense * geoModifier, postReturn, retirementYears);
+    const startingSIP = overrides.startingSIP ?? (state.whatIfSIP || (state.stepUpEnabled
+      ? calcStepUpSIP(targetCorpus, baselineReturn, years, state.annualRaise, state.sipCeiling)
+      : calcFlatSIP(targetCorpus, baselineReturn, years)));
+    const baselineCorpus = state.stepUpEnabled
+      ? calcStepUpAccumulation(startingSIP, baselineReturn, years, state.annualRaise)
+      : calcFlatAccumulation(startingSIP, baselineReturn, years);
+    return { years, targetCorpus, startingSIP, baselineCorpus, conservativeReturn, baselineReturn, optimisticReturn };
+  }
+
+  function updateStressTestCards() {
+    const current = evaluatePlan({});
+    const medical = evaluatePlan({ medicalInflation: 0.16 });
+    const early = evaluatePlan({ retireAge: Math.max(state.currentAge + 1, (state.whatIfRetireAge || state.retirementAge) - 3) });
+    const lower = evaluatePlan({ conservativeReturn: Math.max(0.01, state.conservativeReturn - 0.02), baselineReturn: Math.max(0.01, state.baselineReturn - 0.02), optimisticReturn: Math.max(0.01, state.optimisticReturn - 0.02) });
+
+    const medEl = document.getElementById('stress-medical');
+    const earlyEl = document.getElementById('stress-early');
+    const lowerEl = document.getElementById('stress-return');
+    if (medEl) medEl.textContent = formatSignedCurrency(medical.startingSIP - current.startingSIP) + '/mo';
+    if (earlyEl) earlyEl.textContent = formatSignedCurrency(early.startingSIP - current.startingSIP) + '/mo';
+    if (lowerEl) lowerEl.textContent = formatSignedCurrency(lower.startingSIP - current.startingSIP) + '/mo';
+  }
+
+  window.runStressTest = function (type) {
+    if (type === 'medical-spike') {
+      updateMedicalInflation(16);
+      const medSlider = document.getElementById('medical-inflation');
+      if (medSlider) { medSlider.value = 16; updateSliderTrack(medSlider); }
+    } else if (type === 'retire-early') {
+      setRangeValue('whatif-retire-age', (parseInt(document.getElementById('whatif-retire-age').value) || state.retirementAge) - 3);
+    } else if (type === 'returns-lower') {
+      setRangeValue('whatif-conservative-return', (parseFloat(document.getElementById('whatif-conservative-return').value) || 0) - 2);
+      setRangeValue('whatif-baseline-return', (parseFloat(document.getElementById('whatif-baseline-return').value) || 0) - 2);
+      setRangeValue('whatif-optimistic-return', (parseFloat(document.getElementById('whatif-optimistic-return').value) || 0) - 2);
+    }
+    onWhatIfChange();
+    announceStatus('Stress test applied: ' + type.replace('-', ' ') + '.');
+  };
+
+  function updateMilestoneStory() {
+    const storyEl = document.getElementById('milestone-story-text');
+    const m1 = document.getElementById('milestone-1cr')?.textContent;
+    const m5 = document.getElementById('milestone-5cr')?.textContent;
+    const m10 = document.getElementById('milestone-10cr')?.textContent;
+    if (!storyEl) return;
+    storyEl.textContent = 'Your baseline path reaches ₹1Cr by ' + m1 + ', scales to ₹5Cr by ' + m5 + ', and approaches ₹10Cr by ' + m10 + '. Use the quick chips and stress tests to see how those milestones shift under different life choices.';
+  }
+
+  function updateDeltaSummary(previousSnapshot, currentSnapshot) {
+    const deltaEl = document.getElementById('delta-summary-text');
+    if (!deltaEl || !previousSnapshot || !currentSnapshot) return;
+    const deltas = [];
+    if (previousSnapshot.sip !== currentSnapshot.sip) deltas.push('Starting SIP ' + (currentSnapshot.sip > previousSnapshot.sip ? 'increased' : 'decreased') + ' by ' + formatCurrency(Math.abs(currentSnapshot.sip - previousSnapshot.sip)));
+    if (previousSnapshot.retireAge !== currentSnapshot.retireAge) deltas.push('retirement age moved by ' + Math.abs(currentSnapshot.retireAge - previousSnapshot.retireAge) + ' years');
+    if (previousSnapshot.baselineReturn !== currentSnapshot.baselineReturn) deltas.push('baseline return changed by ' + Math.abs(currentSnapshot.baselineReturn - previousSnapshot.baselineReturn).toFixed(1) + '%');
+    if (previousSnapshot.lifestyleInflation !== currentSnapshot.lifestyleInflation) deltas.push('lifestyle inflation shifted by ' + Math.abs(currentSnapshot.lifestyleInflation - previousSnapshot.lifestyleInflation).toFixed(1) + '%');
+    if (previousSnapshot.geoModifier !== currentSnapshot.geoModifier) deltas.push('retirement geography changed');
+    deltaEl.textContent = deltas.length ? deltas.join(', ') + '.' : 'Adjust a control to see how your plan shifts.';
+  }
+
+  window.savePlanSnapshot = function (slot) {
+    const result = evaluatePlan({});
+    const snapshot = {
+      title: formatCurrency(Math.round(result.startingSIP)) + '/mo at age ' + (state.whatIfRetireAge || state.retirementAge),
+      meta: 'Target corpus ' + formatCorpus(result.targetCorpus) + ' | Lifestyle inflation ' + (state.lifestyleInflation * 100).toFixed(1) + '% | Geo ' + (state.geoModifier === 1 ? 'Metro' : state.geoModifier === 0.75 ? 'Tier-2' : 'Hometown'),
+      sip: result.startingSIP,
+      corpus: result.targetCorpus,
+    };
+    state.planSnapshots[slot] = snapshot;
+    document.getElementById('snapshot-' + slot.toLowerCase() + '-title').textContent = snapshot.title;
+    document.getElementById('snapshot-' + slot.toLowerCase() + '-meta').textContent = snapshot.meta;
+    updateSnapshotDiff();
+    announceStatus('Saved current plan as Plan ' + slot + '.');
+  };
+
+  function updateSnapshotDiff() {
+    const diffEl = document.getElementById('snapshot-diff');
+    const a = state.planSnapshots.A;
+    const b = state.planSnapshots.B;
+    if (!diffEl) return;
+    if (!a || !b) {
+      diffEl.textContent = 'Save both plans to unlock a side-by-side recommendation.';
+      return;
+    }
+    const cheaper = a.sip <= b.sip ? 'Plan A' : 'Plan B';
+    const sipGap = Math.abs(a.sip - b.sip);
+    const corpusGap = Math.abs(a.corpus - b.corpus);
+    diffEl.textContent = cheaper + ' needs ' + formatCurrency(Math.round(sipGap)) + '/mo less, while the target corpus differs by ' + formatCorpus(corpusGap) + '.';
+  }
+
+  function clearDemoTimers() {
+    state.demoTimers.forEach(timer => clearTimeout(timer));
+    state.demoTimers = [];
+  }
+
+  window.stopJudgeDemo = function () {
+    clearDemoTimers();
+    const status = document.getElementById('demo-step-status');
+    if (status) status.textContent = 'Demo stopped. You can run it again anytime.';
+  };
+
+  window.runJudgeDemo = function (fullSequence) {
+    clearDemoTimers();
+    const status = document.getElementById('demo-step-status');
+    if (status) status.textContent = fullSequence ? 'Preparing guided demo: baseline, geo shift, stress test, and recovery.' : 'Narrating your milestone story.';
+    if (!fullSequence) {
+      updateMilestoneStory();
+      return;
+    }
+
+    const stepLeadIn = 480;
+    const stepInterval = 3200;
+    const steps = [
+      function () {
+        applyLocationModifier(1.0);
+        setRangeValue('whatif-retire-age', 60);
+        setRangeValue('whatif-sip', 8500);
+        onWhatIfChange();
+        if (status) status.textContent = 'Demo step 1: Metro retirement baseline.';
+      },
+      function () {
+        applyLocationModifier(0.75);
+        setRangeValue('whatif-retire-age', 63);
+        onWhatIfChange();
+        if (status) status.textContent = 'Demo step 2: Tier-2 move plus delayed retirement improves the plan.';
+      },
+      function () {
+        runStressTest('medical-spike');
+        if (status) status.textContent = 'Demo step 3: Medical inflation shock stress test.';
+      },
+      function () {
+        setRangeValue('whatif-sip', 10500);
+        setRangeValue('whatif-baseline-return', 12);
+        updateMedicalInflation(14);
+        const medSlider = document.getElementById('medical-inflation');
+        if (medSlider) { medSlider.value = 14; updateSliderTrack(medSlider); }
+        onWhatIfChange();
+        if (status) status.textContent = 'Demo step 4: Recovery with a slightly higher SIP and normalized healthcare assumption.';
+      }
+    ];
+
+    steps.forEach((step, index) => {
+      const timer = setTimeout(step, stepLeadIn + index * stepInterval);
+      state.demoTimers.push(timer);
+    });
+
+    const endTimer = setTimeout(() => {
+      if (status) status.textContent = 'Demo complete. You can now tweak assumptions, save snapshots, or rerun the walkthrough.';
+    }, stepLeadIn + steps.length * stepInterval + 320);
+    state.demoTimers.push(endTimer);
+  };
 
   function updateInsightStrip(targetCorpus, startingSIP, years) {
     const inflationImpactEl = document.getElementById('insight-inflation-impact');
@@ -1014,6 +1281,11 @@
     if (num >= 100000) return (num / 100000).toFixed(0) + 'L';
     if (num >= 1000) return (num / 1000).toFixed(0) + 'K';
     return Math.round(num).toString();
+  }
+
+  function formatSignedCurrency(num) {
+    const rounded = Math.round(num);
+    return (rounded >= 0 ? '+' : '-') + formatCurrency(Math.abs(rounded));
   }
 
   // ===== TOAST NOTIFICATIONS =====

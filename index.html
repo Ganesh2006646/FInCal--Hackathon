@@ -495,6 +495,14 @@
             <input type="range" id="whatif-lifestyle-inflation" class="slider" min="3" max="10" step="0.5" value="6" oninput="onWhatIfChange()">
           </div>
         </div>
+        <div class="assumption-chip-row" aria-label="Quick assumption chips">
+          <button class="assumption-chip" onclick="applyQuickAdjustment('sip-plus')">+₹1,000 SIP</button>
+          <button class="assumption-chip" onclick="applyQuickAdjustment('retire-later')">Retire +3 years</button>
+          <button class="assumption-chip" onclick="applyQuickAdjustment('tier2')">Move to Tier-2</button>
+          <button class="assumption-chip" onclick="applyQuickAdjustment('return-down')">Baseline -1%</button>
+          <button class="assumption-chip" onclick="applyQuickAdjustment('medical-up')">Medical Inflation 16%</button>
+          <button class="assumption-chip" onclick="applyQuickAdjustment('reset')">Reset quick changes</button>
+        </div>
         <div class="everyday-translator" id="everyday-translator" aria-live="polite">
           <span class="translator-icon">☕</span>
           <span id="translator-text">Adding ₹1,000/mo is just <strong>skipping 3 coffees</strong>, but it adds <strong>₹35 Lakhs</strong> to your Baseline corpus!</span>
@@ -513,6 +521,10 @@
             <strong id="insight-contribution-outlook">-</strong>
           </div>
         </div>
+        <div class="delta-summary" id="delta-summary" aria-live="polite">
+          <span class="delta-label">What changed</span>
+          <strong id="delta-summary-text">Adjust a control to see how your plan shifts.</strong>
+        </div>
       </div>
 
       <!-- Summary Card -->
@@ -524,7 +536,91 @@
           <svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true"><circle cx="10" cy="10" r="8" stroke="#2e7d32" stroke-width="1.5" fill="#e8f5e9"/><path d="M7 10l2 2 4-4" stroke="#2e7d32" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
           Growing 10% annually until capped at ₹34,000 in Year 15
         </div>
+        <div class="affordability-grid" aria-label="Monthly affordability lens">
+          <div class="affordability-card">
+            <span>Share of monthly expenses</span>
+            <strong id="affordability-share">-</strong>
+          </div>
+          <div class="affordability-card">
+            <span>Estimated first raise year SIP</span>
+            <strong id="affordability-next-year">-</strong>
+          </div>
+          <div class="affordability-card">
+            <span>Retirement target corpus</span>
+            <strong id="affordability-target">-</strong>
+          </div>
+        </div>
       </div>
+
+      <div class="decision-lab-grid">
+        <section class="lab-card stress-lab" aria-labelledby="stress-lab-heading">
+          <div class="lab-card-header">
+            <h3 id="stress-lab-heading">Retirement Stress Test</h3>
+            <p>Explore downside shocks without leaving the page.</p>
+          </div>
+          <div class="stress-grid">
+            <button class="stress-card" onclick="runStressTest('medical-spike')">
+              <span class="stress-title">Medical Cost Spike</span>
+              <strong id="stress-medical">-</strong>
+              <span class="stress-note">Medical inflation set to 16%</span>
+            </button>
+            <button class="stress-card" onclick="runStressTest('retire-early')">
+              <span class="stress-title">Retire Early</span>
+              <strong id="stress-early">-</strong>
+              <span class="stress-note">Retirement age reduced by 3 years</span>
+            </button>
+            <button class="stress-card" onclick="runStressTest('returns-lower')">
+              <span class="stress-title">Lower Return Cycle</span>
+              <strong id="stress-return">-</strong>
+              <span class="stress-note">Pre-retirement returns reduced by 2%</span>
+            </button>
+          </div>
+        </section>
+
+        <section class="lab-card snapshot-lab" aria-labelledby="snapshot-lab-heading">
+          <div class="lab-card-header">
+            <h3 id="snapshot-lab-heading">Plan Compare Snapshot</h3>
+            <p>Pin two strategies and compare them instantly.</p>
+          </div>
+          <div class="snapshot-actions">
+            <button class="btn-secondary" onclick="savePlanSnapshot('A')">Save as Plan A</button>
+            <button class="btn-secondary" onclick="savePlanSnapshot('B')">Save as Plan B</button>
+          </div>
+          <div class="snapshot-compare-grid">
+            <div class="snapshot-card" id="snapshot-a-card">
+              <span class="snapshot-label">Plan A</span>
+              <strong id="snapshot-a-title">Not saved yet</strong>
+              <span id="snapshot-a-meta">Save the current result state.</span>
+            </div>
+            <div class="snapshot-card" id="snapshot-b-card">
+              <span class="snapshot-label">Plan B</span>
+              <strong id="snapshot-b-title">Not saved yet</strong>
+              <span id="snapshot-b-meta">Save another state to compare.</span>
+            </div>
+          </div>
+          <div class="snapshot-diff" id="snapshot-diff">Save both plans to unlock a side-by-side recommendation.</div>
+        </section>
+      </div>
+
+      <section class="story-strip" aria-labelledby="story-strip-heading">
+        <div class="story-strip-header">
+          <h3 id="story-strip-heading">Milestone Timeline Story</h3>
+          <button class="btn-secondary" onclick="runJudgeDemo(false)">Play Story</button>
+        </div>
+        <p id="milestone-story-text">Your milestone story appears here after calculation.</p>
+      </section>
+
+      <section class="demo-mode-card" aria-labelledby="demo-mode-heading">
+        <div class="lab-card-header">
+          <h3 id="demo-mode-heading">Judge Demo Mode</h3>
+          <p>Auto-walk through your strongest showcase scenarios.</p>
+        </div>
+        <div class="demo-mode-actions">
+          <button class="btn-primary" onclick="runJudgeDemo(true)">Run Full Demo</button>
+          <button class="btn-secondary" onclick="stopJudgeDemo()">Stop Demo</button>
+        </div>
+        <div class="demo-step-status" id="demo-step-status">Demo idle. Run the sequence to present baseline, geo shift, and stress test scenarios.</div>
+      </section>
 
       <!-- 3-Column Scenario Grid -->
       <div class="scenario-grid">
