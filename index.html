@@ -44,7 +44,7 @@
         </div>
 
         <div class="floating-badge badge-left" aria-hidden="true">
-          <span class="badge-icon">🏥</span>
+          <span class="badge-icon">H</span>
           <div>
             <strong>Healthcare Buffer</strong>
             <span class="badge-desc">14% Med-Inflation</span>
@@ -52,7 +52,7 @@
         </div>
 
         <div class="floating-badge badge-right" aria-hidden="true">
-          <span class="badge-icon">🧭</span>
+          <span class="badge-icon">S</span>
           <div>
             <strong>Step-Up SIP</strong>
             <span class="badge-desc">Grows with salary</span>
@@ -60,7 +60,7 @@
         </div>
 
         <div class="floating-badge badge-bottom-left" aria-hidden="true">
-          <span class="badge-icon">📍</span>
+          <span class="badge-icon">G</span>
           <div>
             <strong>Geo-Arbitrage</strong>
             <span class="badge-desc">Location-based goals</span>
@@ -121,15 +121,17 @@
         <!-- Current Age -->
         <div class="input-group">
           <label for="current-age" class="input-label">Your Current Age <span class="required" aria-label="required">*</span></label>
-          <input type="number" id="current-age" min="18" max="65" placeholder="e.g., 28" aria-describedby="age-hint" aria-required="true" value="28">
+          <input type="number" id="current-age" min="18" max="65" placeholder="e.g., 28" aria-describedby="age-hint age-error" aria-required="true" value="28">
           <span id="age-hint" class="helper-text">Between 18–65 years</span>
+          <span id="age-error" class="field-error" role="alert"></span>
         </div>
 
         <!-- Retirement Age -->
         <div class="input-group">
           <label for="retirement-age" class="input-label">Target Retirement Age <span class="required" aria-label="required">*</span></label>
-          <input type="number" id="retirement-age" min="30" max="75" placeholder="e.g., 60" aria-describedby="retire-hint" aria-required="true" value="60">
+          <input type="number" id="retirement-age" min="30" max="75" placeholder="e.g., 60" aria-describedby="retire-hint retire-error" aria-required="true" value="60">
           <span id="retire-hint" class="helper-text">When you want to stop working</span>
+          <span id="retire-error" class="field-error" role="alert"></span>
         </div>
 
         <!-- Monthly Expenses -->
@@ -142,10 +144,11 @@
             </div>
             <div class="currency-input">
               <span class="currency-prefix">₹</span>
-              <input type="number" id="monthly-expenses" min="10000" max="200000" step="1000" value="50000" aria-describedby="expense-hint">
+              <input type="number" id="monthly-expenses" min="10000" max="200000" step="1000" value="50000" aria-describedby="expense-hint expense-error">
             </div>
           </div>
           <span id="expense-hint" class="helper-text">₹10,000 – ₹2,00,000</span>
+          <span id="expense-error" class="field-error" role="alert"></span>
           <div class="inflation-preview" id="inflation-preview" aria-live="polite">
             <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><circle cx="8" cy="8" r="7" stroke="#1976d2" stroke-width="1.5"/><path d="M8 5v3M8 10v1" stroke="#1976d2" stroke-width="1.5" stroke-linecap="round"/></svg>
             <span>At 6% inflation, this becomes <strong id="inflated-amount">₹2,87,000</strong>/month in <strong id="inflation-years">32</strong> years</span>
@@ -220,6 +223,13 @@
             <div class="slider-value-display red-value" id="medical-inflation-display">14%</div>
             <input type="range" id="medical-inflation" class="slider red-slider" min="8" max="16" step="1" value="14" oninput="updateMedicalInflation(this.value)">
             <div class="slider-minmax"><span>8%</span><span>16%</span></div>
+          </div>
+
+          <div class="input-group">
+            <label for="lifestyle-inflation" class="input-label">Expected Lifestyle Inflation</label>
+            <div class="slider-value-display blue-value" id="lifestyle-inflation-display">6%</div>
+            <input type="range" id="lifestyle-inflation" class="slider" min="3" max="10" step="0.5" value="6" oninput="updateLifestyleInflation(this.value)">
+            <div class="slider-minmax"><span>3%</span><span>10%</span></div>
           </div>
 
           <div class="info-box warning-box">
@@ -393,7 +403,7 @@
               <div class="compare-note">(Never changes)</div>
             </div>
             <div class="compare-card lifeproof">
-              <div class="badge-achievable">Highly Achievable</div>
+              <div class="badge-achievable">Illustrative Plan</div>
               <div class="compare-header">✅ Life-Proof Approach</div>
               <div class="compare-amount" id="lifeproof-sip">₹8,500<span>/mo</span></div>
               <div class="compare-sub">Start today, grow <span id="compare-raise">10</span>%/year</div>
@@ -437,6 +447,7 @@
       <div class="dashboard-header">
         <h2 id="step4-heading">Your Life-Proof Retirement Plan</h2>
         <p class="card-subtitle">Three scenarios based on market history — plan for reality</p>
+        <div class="compliance-pill">Illustrative only • All assumptions are editable • No scheme recommendation</div>
       </div>
 
       <!-- What-If Controls -->
@@ -478,10 +489,29 @@
             <div class="whatif-value" id="whatif-optimistic-return-display">15.0%</div>
             <input type="range" id="whatif-optimistic-return" class="slider" min="8" max="22" step="0.5" value="15" oninput="onWhatIfChange()">
           </div>
+          <div class="whatif-control">
+            <label for="whatif-lifestyle-inflation">Lifestyle Inflation (%)</label>
+            <div class="whatif-value" id="whatif-lifestyle-inflation-display">6.0%</div>
+            <input type="range" id="whatif-lifestyle-inflation" class="slider" min="3" max="10" step="0.5" value="6" oninput="onWhatIfChange()">
+          </div>
         </div>
         <div class="everyday-translator" id="everyday-translator" aria-live="polite">
           <span class="translator-icon">☕</span>
           <span id="translator-text">Adding ₹1,000/mo is just <strong>skipping 3 coffees</strong>, but it adds <strong>₹35 Lakhs</strong> to your Baseline corpus!</span>
+        </div>
+        <div class="insight-strip" aria-label="Sensitivity quick scan">
+          <div class="insight-chip">
+            <span class="chip-label">Inflation Impact</span>
+            <strong id="insight-inflation-impact">-</strong>
+          </div>
+          <div class="insight-chip">
+            <span class="chip-label">Return Sensitivity</span>
+            <strong id="insight-return-sensitivity">-</strong>
+          </div>
+          <div class="insight-chip">
+            <span class="chip-label">Contribution Outlook</span>
+            <strong id="insight-contribution-outlook">-</strong>
+          </div>
         </div>
       </div>
 
@@ -511,8 +541,8 @@
             <div class="gap-indicator red-gap">
               <svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M10 2l8.7 15H1.3L10 2z" stroke="#c62828" stroke-width="1.5" fill="#ffebee"/><path d="M10 8v4M10 14v1" stroke="#c62828" stroke-width="1.5" stroke-linecap="round"/></svg>
               <div>
-                <strong id="gap-conservative">Shortfall: ₹3.67 Cr below target</strong>
-                <span>Consider increasing SIP by 15%</span>
+                <strong id="gap-conservative">Indicative shortfall: ₹3.67 Cr below target</strong>
+                <span>Try adjusting assumptions in What-If controls</span>
               </div>
             </div>
             <div class="assumptions">
@@ -522,7 +552,7 @@
                 <li id="assumption-post-c">Post-retirement return: 7.0%</li>
                 <li id="assumption-years-c">Years in retirement: 25</li>
                 <li id="assumption-med-c">Healthcare inflation: 14%</li>
-                <li>Lifestyle inflation: 6%</li>
+                <li id="assumption-life-c">Lifestyle inflation: 6%</li>
               </ul>
             </div>
           </div>
@@ -542,8 +572,8 @@
             <div class="gap-indicator green-gap">
               <svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true"><circle cx="10" cy="10" r="8" stroke="#2e7d32" stroke-width="1.5" fill="#e8f5e9"/><path d="M7 10l2 2 4-4" stroke="#2e7d32" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
               <div>
-                <strong id="gap-baseline">✓ On Track to Goal</strong>
-                <span>This assumes typical market performance</span>
+                <strong id="gap-baseline">Indicatively aligned to goal</strong>
+                <span>Based on baseline market assumptions</span>
               </div>
             </div>
             <div class="assumptions">
@@ -553,7 +583,7 @@
                 <li id="assumption-post-b">Post-retirement return: 7.0%</li>
                 <li id="assumption-years-b">Years in retirement: 25</li>
                 <li id="assumption-med-b">Healthcare inflation: 14%</li>
-                <li>Lifestyle inflation: 6%</li>
+                <li id="assumption-life-b">Lifestyle inflation: 6%</li>
               </ul>
             </div>
           </div>
@@ -572,8 +602,8 @@
             <div class="gap-indicator blue-gap">
               <svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true"><circle cx="10" cy="10" r="8" stroke="#1976d2" stroke-width="1.5" fill="#e3f2fd"/><path d="M7 10l2 2 4-4" stroke="#1976d2" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
               <div>
-                <strong id="gap-optimistic">Surplus: +₹5.5 Cr above target</strong>
-                <span>Extra cushion for legacy or extended travel</span>
+                <strong id="gap-optimistic">Indicative surplus: +₹5.5 Cr above target</strong>
+                <span>Potential cushion under optimistic assumptions</span>
               </div>
             </div>
             <div class="assumptions">
@@ -583,7 +613,7 @@
                 <li id="assumption-post-o">Post-retirement return: 7.0%</li>
                 <li id="assumption-years-o">Years in retirement: 25</li>
                 <li id="assumption-med-o">Healthcare inflation: 14%</li>
-                <li>Lifestyle inflation: 6%</li>
+                <li id="assumption-life-o">Lifestyle inflation: 6%</li>
               </ul>
             </div>
           </div>
@@ -592,8 +622,13 @@
 
       <!-- Smart Narrative -->
       <div class="smart-narrative-box" aria-live="polite">
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" stroke="#224c87" stroke-width="2" stroke-linejoin="round"/></svg>
-        <div id="smart-narrative-text"></div>
+        <div class="narrative-icon-wrap" aria-hidden="true">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" stroke="#224c87" stroke-width="2" stroke-linejoin="round"/></svg>
+        </div>
+        <div class="narrative-copy">
+          <div class="narrative-eyebrow">AI STRATEGY SUMMARY</div>
+          <div id="smart-narrative-text"></div>
+        </div>
       </div>
 
       <!-- Timeline -->
@@ -607,6 +642,32 @@
           <canvas id="growthCanvas" width="1100" height="280"></canvas>
           <div class="chart-scrubber-line" id="chart-scrubber-line" aria-hidden="true"></div>
         </div>
+
+        <div class="chart-kpis" aria-label="Scenario summary">
+          <div class="chart-kpi chart-kpi-cons">
+            <span class="chart-kpi-label">Conservative</span>
+            <strong id="kpi-conservative">-</strong>
+          </div>
+          <div class="chart-kpi chart-kpi-base">
+            <span class="chart-kpi-label">Baseline</span>
+            <strong id="kpi-baseline">-</strong>
+          </div>
+          <div class="chart-kpi chart-kpi-opt">
+            <span class="chart-kpi-label">Optimistic</span>
+            <strong id="kpi-optimistic">-</strong>
+          </div>
+          <div class="chart-kpi chart-kpi-gap">
+            <span class="chart-kpi-label">Best vs Base Gap</span>
+            <strong id="kpi-gap">-</strong>
+          </div>
+        </div>
+
+        <div class="milestone-row" aria-label="Baseline milestones">
+          <div class="milestone-card"><span>₹1Cr</span><strong id="milestone-1cr">-</strong></div>
+          <div class="milestone-card"><span>₹5Cr</span><strong id="milestone-5cr">-</strong></div>
+          <div class="milestone-card"><span>₹10Cr</span><strong id="milestone-10cr">-</strong></div>
+        </div>
+
         <div class="chart-legend">
           <span class="legend-item"><span class="legend-dot orange-dot"></span>Conservative (6%)</span>
           <span class="legend-item"><span class="legend-dot blue-dot"></span>Baseline (12%)</span>
@@ -616,7 +677,7 @@
 
       <!-- CTA Box -->
       <div class="final-cta">
-        <svg width="64" height="64" viewBox="0 0 64 64" fill="none" aria-hidden="true"><circle cx="32" cy="32" r="28" fill="rgba(255,215,0,0.2)"/><path d="M32 12c-2 0-4 8-4 20s2 20 4 20 4-8 4-20-2-20-4-20z" fill="#ffd700"/><path d="M16 26c0-2 8-6 16-6s16 4 16 6-8 6-16 6-16-4-16-6z" fill="#ffd700" opacity="0.7"/></svg>
+        <svg width="64" height="64" viewBox="0 0 64 64" fill="none" aria-hidden="true"><circle cx="32" cy="32" r="28" fill="rgba(255,255,255,0.15)"/><circle cx="32" cy="32" r="18" stroke="#ffd700" stroke-width="3"/><circle cx="32" cy="32" r="7" fill="#ffd700"/></svg>
         <h3>Ready to Take the Next Step?</h3>
         <p>Explore HDFC Mutual Fund SIPs or speak with a financial advisor</p>
         <div class="final-buttons">
@@ -632,6 +693,7 @@
   </section>
 
   <!-- ========== TOAST CONTAINER ========== -->
+  <div id="form-status" class="sr-only" aria-live="assertive" aria-atomic="true"></div>
   <div id="toast-container" class="toast-container" aria-live="polite" aria-relevant="additions"></div>
 
   <!-- ========== STICKY DISCLAIMER FOOTER ========== -->

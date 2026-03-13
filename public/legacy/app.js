@@ -32,6 +32,35 @@
     whatIfRetirementDuration: null,
   };
 
+  function prefersReducedMotion() {
+    return window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  }
+
+  function announceStatus(message) {
+    const statusEl = document.getElementById('form-status');
+    if (statusEl) statusEl.textContent = message;
+  }
+
+  function setFieldError(inputId, message) {
+    const input = document.getElementById(inputId);
+    const error = document.getElementById(inputId.replace('current-age', 'age').replace('retirement-age', 'retire').replace('monthly-expenses', 'expense') + '-error');
+    if (input) {
+      input.classList.add('error');
+      input.setAttribute('aria-invalid', 'true');
+    }
+    if (error) error.textContent = message;
+  }
+
+  function clearFieldError(inputId) {
+    const input = document.getElementById(inputId);
+    const error = document.getElementById(inputId.replace('current-age', 'age').replace('retirement-age', 'retire').replace('monthly-expenses', 'expense') + '-error');
+    if (input) {
+      input.classList.remove('error');
+      input.setAttribute('aria-invalid', 'false');
+    }
+    if (error) error.textContent = '';
+  }
+
   // ===== NAVIGATION =====
   window.goToStep = function (stepNum) {
     document.querySelectorAll('.step').forEach(s => s.classList.remove('active'));
@@ -75,7 +104,7 @@
     const expenses = parseInt(document.getElementById('monthly-expenses').value) || 50000;
     const years = (parseInt(document.getElementById('retirement-age').value) || 60) - (parseInt(document.getElementById('current-age').value) || 28);
     if (years <= 0) return;
-    const inflated = expenses * Math.pow(1.06, years);
+    const inflated = expenses * Math.pow(1 + state.lifestyleInflation, years);
     document.getElementById('inflated-amount').textContent = formatCurrency(Math.round(inflated));
     document.getElementById('inflation-years').textContent = years;
   }
@@ -145,24 +174,35 @@
     const retire = parseInt(document.getElementById('retirement-age').value);
     const expenses = parseInt(document.getElementById('monthly-expenses').value);
 
+    clearFieldError('current-age');
+    clearFieldError('retirement-age');
+    clearFieldError('monthly-expenses');
+
     if (!age || age < 18 || age > 65) {
-      document.getElementById('current-age').classList.add('error');
+      setFieldError('current-age', 'Enter an age between 18 and 65 years.');
+      document.getElementById('current-age').focus();
+      announceStatus('Current age is invalid. Enter an age between 18 and 65 years.');
       showToast('error', 'Invalid Age', 'Current age must be between 18 and 65 years.', 'Fix Ages');
       return;
     }
-    document.getElementById('current-age').classList.remove('error');
 
     if (!retire || retire <= age) {
-      document.getElementById('retirement-age').classList.add('error');
+      setFieldError('retirement-age', 'Retirement age must be greater than current age.');
+      document.getElementById('retirement-age').focus();
+      announceStatus('Retirement age is invalid. It must be greater than your current age.');
       showToast('error', 'Time Flows Forward', 'Your retirement age needs to be after your current age. Most people retire between 58–65 in India.', 'Fix Ages');
       return;
     }
-    document.getElementById('retirement-age').classList.remove('error');
 
     if (!expenses || expenses < 10000 || expenses > 200000) {
+      setFieldError('monthly-expenses', 'Enter monthly expenses between 10,000 and 2,00,000 rupees.');
+      document.getElementById('monthly-expenses').focus();
+      announceStatus('Monthly expenses are invalid. Enter a value between 10,000 and 2,00,000 rupees.');
       showToast('warning', "Let's Be Realistic", 'Monthly expenses should be between ₹10,000 and ₹2,00,000 for this calculator.', 'Adjust');
       return;
     }
+
+    announceStatus('Step 1 completed. Moving to healthcare and retirement assumptions.');
 
     state.currentAge = age;
     state.retirementAge = retire;
@@ -185,6 +225,13 @@
     state.medicalInflation = parseInt(val) / 100;
     document.getElementById('medical-inflation-display').textContent = val + '%';
     const slider = document.getElementById('medical-inflation');
+    updateSliderTrack(slider);
+  };
+
+  window.updateLifestyleInflation = function (val) {
+    state.lifestyleInflation = parseFloat(val) / 100;
+    document.getElementById('lifestyle-inflation-display').textContent = parseFloat(val).toFixed(1).replace('.0', '') + '%';
+    const slider = document.getElementById('lifestyle-inflation');
     updateSliderTrack(slider);
   };
 
@@ -324,6 +371,7 @@
     const conservativeReturnVal = parseFloat(document.getElementById('whatif-conservative-return').value);
     const baselineReturnVal = parseFloat(document.getElementById('whatif-baseline-return').value);
     const optimisticReturnVal = parseFloat(document.getElementById('whatif-optimistic-return').value);
+    const lifestyleInflationVal = parseFloat(document.getElementById('whatif-lifestyle-inflation').value);
     document.getElementById('whatif-sip-display').textContent = formatCurrency(sipVal);
     document.getElementById('whatif-retire-display').textContent = retireVal;
     document.getElementById('whatif-post-return-display').textContent = postReturnVal.toFixed(1) + '%';
@@ -331,6 +379,7 @@
     document.getElementById('whatif-conservative-return-display').textContent = conservativeReturnVal.toFixed(1) + '%';
     document.getElementById('whatif-baseline-return-display').textContent = baselineReturnVal.toFixed(1) + '%';
     document.getElementById('whatif-optimistic-return-display').textContent = optimisticReturnVal.toFixed(1) + '%';
+    document.getElementById('whatif-lifestyle-inflation-display').textContent = lifestyleInflationVal.toFixed(1) + '%';
     updateSliderTrack(document.getElementById('whatif-sip'));
     updateSliderTrack(document.getElementById('whatif-retire-age'));
     updateSliderTrack(document.getElementById('whatif-post-return'));
@@ -338,6 +387,7 @@
     updateSliderTrack(document.getElementById('whatif-conservative-return'));
     updateSliderTrack(document.getElementById('whatif-baseline-return'));
     updateSliderTrack(document.getElementById('whatif-optimistic-return'));
+    updateSliderTrack(document.getElementById('whatif-lifestyle-inflation'));
     state.whatIfSIP = sipVal;
     state.whatIfRetireAge = retireVal;
     state.whatIfPostRetirementReturn = postReturnVal / 100;
@@ -345,6 +395,7 @@
     state.conservativeReturn = conservativeReturnVal / 100;
     state.baselineReturn = baselineReturnVal / 100;
     state.optimisticReturn = optimisticReturnVal / 100;
+    state.lifestyleInflation = lifestyleInflationVal / 100;
     runFullCalculation();
     drawChart();
     updateEverydayTranslator();
@@ -420,6 +471,12 @@
       document.getElementById('whatif-optimistic-return-display').textContent = (state.optimisticReturn * 100).toFixed(1) + '%';
       updateSliderTrack(optimisticReturnSlider);
     }
+    const lifestyleInflationSlider = document.getElementById('whatif-lifestyle-inflation');
+    if (lifestyleInflationSlider) {
+      lifestyleInflationSlider.value = state.lifestyleInflation * 100;
+      document.getElementById('whatif-lifestyle-inflation-display').textContent = (state.lifestyleInflation * 100).toFixed(1) + '%';
+      updateSliderTrack(lifestyleInflationSlider);
+    }
 
     // Summary
     document.getElementById('result-starting-sip').textContent = formatCurrency(Math.round(startingSIP)) + '/month';
@@ -448,6 +505,11 @@
       const el = document.getElementById(id);
       if (el) el.textContent = 'Years in retirement: ' + retirementDuration;
     });
+    const lifePct = (state.lifestyleInflation * 100).toFixed(1).replace('.0', '') + '%';
+    ['assumption-life-c', 'assumption-life-b', 'assumption-life-o'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.textContent = 'Lifestyle inflation: ' + lifePct;
+    });
     document.getElementById('assumption-pre-c').innerHTML = 'Pre-retirement return: <strong>' + (state.conservativeReturn * 100).toFixed(1) + '%</strong>';
     document.getElementById('assumption-pre-b').innerHTML = 'Pre-retirement return: <strong>' + (state.baselineReturn * 100).toFixed(1) + '%</strong>';
     document.getElementById('assumption-pre-o').innerHTML = 'Pre-retirement return: <strong>' + (state.optimisticReturn * 100).toFixed(1) + '%</strong>';
@@ -470,21 +532,21 @@
       const diff = accumulated - targetCorpus;
       if (sc.id === 'conservative') {
         if (diff < 0) {
-          gapEl.innerHTML = '<strong>Shortfall: ' + formatCorpus(Math.abs(diff)) + ' below target</strong><span>Consider increasing SIP by 15%</span>';
+          gapEl.innerHTML = '<strong>Indicative shortfall: ' + formatCorpus(Math.abs(diff)) + ' below target</strong><span>Consider adjusting SIP or retirement age</span>';
         } else {
-          gapEl.innerHTML = '<strong>✓ Meets Target</strong><span>Even with conservative returns</span>';
+          gapEl.innerHTML = '<strong>Indicative target match</strong><span>Within conservative return assumptions</span>';
         }
       } else if (sc.id === 'baseline') {
         if (diff >= 0) {
-          gapEl.innerHTML = '<strong>✓ On Track to Goal</strong><span>This assumes typical market performance</span>';
+          gapEl.innerHTML = '<strong>Indicatively aligned to goal</strong><span>Based on baseline market assumptions</span>';
         } else {
-          gapEl.innerHTML = '<strong>Shortfall: ' + formatCorpus(Math.abs(diff)) + '</strong><span>Consider adjusting parameters</span>';
+          gapEl.innerHTML = '<strong>Indicative shortfall: ' + formatCorpus(Math.abs(diff)) + '</strong><span>Try adjusting assumptions in What-If controls</span>';
         }
       } else {
         if (diff > 0) {
-          gapEl.innerHTML = '<strong>Surplus: +' + formatCorpus(diff) + ' above target</strong><span>Extra cushion for legacy or extended travel</span>';
+          gapEl.innerHTML = '<strong>Indicative surplus: +' + formatCorpus(diff) + ' above target</strong><span>Potential additional cushion under optimistic returns</span>';
         } else {
-          gapEl.innerHTML = '<strong>✓ Meets Target</strong><span>Optimistic scenario achieves goal</span>';
+          gapEl.innerHTML = '<strong>Near target in optimistic case</strong><span>Review contribution and timeline assumptions</span>';
         }
       }
     });
@@ -492,12 +554,21 @@
     // --- Generate Smart Narrative ---
     const narrativeEl = document.getElementById('smart-narrative-text');
     const geoText = state.geoModifier === 1.0 ? "staying in the Metro" : (state.geoModifier === 0.75 ? "moving to a Tier-2 city" : "retiring in the countryside");
-    const healthText = state.healthcareRatio >= 0.25 ? "smartly buffering for 14% medical inflation" : "assuming standard healthcare costs";
+    const healthText = state.healthcareRatio >= 0.25
+      ? `buffering for ${(state.medicalInflation * 100).toFixed(1).replace('.0', '')}% medical inflation`
+      : `using ${(state.lifestyleInflation * 100).toFixed(1).replace('.0', '')}% lifestyle inflation assumptions`;
     const stepUpText = state.stepUpEnabled ? `leveraging your career growth with a ${Math.round(state.annualRaise*100)}% annual SIP step-up` : "using a flat monthly contribution";
     
-    const narrativeString = `By planning to retire at ${state.whatIfRetireAge || state.retirementAge} and ${geoText}, you are optimizing your corpus. You are ${healthText} and ${stepUpText}. This \u201CLife-Proof\u201D strategy makes your goal highly achievable today.`;
+    const narrativeString = `By planning to retire at ${state.whatIfRetireAge || state.retirementAge} and ${geoText}, you are shaping a realistic retirement path. You are ${healthText} and ${stepUpText}. This \u201CLife-Proof\u201D view is illustrative and helps you compare trade-offs responsibly.`;
     
     narrativeEl.innerHTML = '';
+    if (prefersReducedMotion()) {
+      narrativeEl.textContent = narrativeString;
+      updateURLState();
+      updateEverydayTranslator();
+      updateInsightStrip(targetCorpus, startingSIP, years);
+      return;
+    }
     let charIdx = 0;
     function typeWriter() {
       if (charIdx < narrativeString.length) {
@@ -510,6 +581,34 @@
 
     updateURLState();
     updateEverydayTranslator();
+    updateInsightStrip(targetCorpus, startingSIP, years);
+  }
+
+  function updateInsightStrip(targetCorpus, startingSIP, years) {
+    const inflationImpactEl = document.getElementById('insight-inflation-impact');
+    const returnSensitivityEl = document.getElementById('insight-return-sensitivity');
+    const contributionOutlookEl = document.getElementById('insight-contribution-outlook');
+    if (!inflationImpactEl || !returnSensitivityEl || !contributionOutlookEl) return;
+
+    const annualExpense = state.monthlyExpenses * 12;
+    const inflatedAtCurrent = calcFutureExpense(annualExpense, state.healthcareRatio, state.lifestyleInflation, state.medicalInflation, years) * state.geoModifier;
+    const inflatedAtHigher = calcFutureExpense(annualExpense, state.healthcareRatio, state.lifestyleInflation + 0.01, state.medicalInflation, years) * state.geoModifier;
+    const corpusHigherInflation = calcCorpus(inflatedAtHigher, state.whatIfPostRetirementReturn || state.postRetirementReturn, state.whatIfRetirementDuration || state.retirementDuration);
+    const inflationDelta = Math.max(0, corpusHigherInflation - targetCorpus);
+    inflationImpactEl.textContent = '+1% inflation may add ' + formatCorpusShort(inflationDelta) + ' corpus need';
+
+    const lowerRate = Math.max(0.01, state.baselineReturn - 0.01);
+    const upperRate = state.baselineReturn + 0.01;
+    const lowAccum = state.stepUpEnabled
+      ? calcStepUpAccumulation(startingSIP, lowerRate, years, state.annualRaise)
+      : calcFlatAccumulation(startingSIP, lowerRate, years);
+    const highAccum = state.stepUpEnabled
+      ? calcStepUpAccumulation(startingSIP, upperRate, years, state.annualRaise)
+      : calcFlatAccumulation(startingSIP, upperRate, years);
+    returnSensitivityEl.textContent = '±1% return shifts corpus by about ' + formatCorpusShort(Math.abs(highAccum - lowAccum));
+
+    const monthShare = Math.min(100, Math.max(1, (startingSIP / Math.max(1, state.monthlyExpenses)) * 100));
+    contributionOutlookEl.textContent = 'Starting SIP is ~' + monthShare.toFixed(0) + '% of current monthly expenses';
   }
 
   function updateEverydayTranslator() {
@@ -580,6 +679,7 @@
     params.set('geo', state.geoModifier);
     params.set('post', (state.whatIfPostRetirementReturn || state.postRetirementReturn).toFixed(3));
     params.set('ryears', (state.whatIfRetirementDuration || state.retirementDuration));
+    params.set('lifeinf', state.lifestyleInflation.toFixed(3));
     params.set('rc', state.conservativeReturn.toFixed(3));
     params.set('rb', state.baselineReturn.toFixed(3));
     params.set('ro', state.optimisticReturn.toFixed(3));
@@ -668,6 +768,10 @@
     els.forEach(el => {
       const target = parseFloat(el.getAttribute('data-target'));
       if (!target) return;
+      if (prefersReducedMotion()) {
+        el.textContent = formatCorpus(target);
+        return;
+      }
       const duration = 2000;
       const start = performance.now();
       function tick(now) {
@@ -715,25 +819,6 @@
       { rate: state.optimisticReturn, color: '#2e7d32', label: 'Optimistic' },
     ];
 
-    // Compute data points for each scenario
-    const allData = rates.map(sc => {
-      const points = [];
-      let total = 0;
-      let sip = startingSIP;
-      const monthlyReturn = sc.rate / 12;
-      for (let y = 0; y <= years; y++) {
-        points.push({ year: y, value: total });
-        if (y < years) {
-          const yearFV = sip * ((Math.pow(1 + monthlyReturn, 12) - 1) / monthlyReturn) * (1 + monthlyReturn);
-          const yearsRemaining = years - y - 1;
-          total += yearFV * Math.pow(1 + sc.rate, yearsRemaining);
-          if (state.stepUpEnabled) sip = sip * (1 + state.annualRaise);
-        }
-      }
-      // Recalculate properly: just track running total
-      return points;
-    });
-
     // Better approach: track actual accumulation at each year
     const seriesData = rates.map(sc => {
       const points = [];
@@ -752,10 +837,44 @@
       return { points, color: sc.color };
     });
 
+    const kpiCons = document.getElementById('kpi-conservative');
+    const kpiBase = document.getElementById('kpi-baseline');
+    const kpiOpt = document.getElementById('kpi-optimistic');
+    const kpiGap = document.getElementById('kpi-gap');
+    if (kpiCons && kpiBase && kpiOpt && kpiGap) {
+      const conservativeEnd = seriesData[0].points[seriesData[0].points.length - 1].value;
+      const baselineEnd = seriesData[1].points[seriesData[1].points.length - 1].value;
+      const optimisticEnd = seriesData[2].points[seriesData[2].points.length - 1].value;
+      kpiCons.textContent = formatCorpusShort(conservativeEnd);
+      kpiBase.textContent = formatCorpusShort(baselineEnd);
+      kpiOpt.textContent = formatCorpusShort(optimisticEnd);
+      kpiGap.textContent = formatCorpusShort(Math.max(0, optimisticEnd - baselineEnd));
+    }
+
+    const baselinePoints = seriesData[1].points;
+    const milestone1El = document.getElementById('milestone-1cr');
+    const milestone5El = document.getElementById('milestone-5cr');
+    const milestone10El = document.getElementById('milestone-10cr');
+    if (milestone1El && milestone5El && milestone10El) {
+      const m1 = baselinePoints.find(p => p.value >= 10000000);
+      const m5 = baselinePoints.find(p => p.value >= 50000000);
+      const m10 = baselinePoints.find(p => p.value >= 100000000);
+      milestone1El.textContent = m1 ? ('Year ' + m1.year) : 'Beyond horizon';
+      milestone5El.textContent = m5 ? ('Year ' + m5.year) : 'Beyond horizon';
+      milestone10El.textContent = m10 ? ('Year ' + m10.year) : 'Beyond horizon';
+    }
+
     // Find max value
     let maxVal = 0;
     seriesData.forEach(s => s.points.forEach(p => { if (p.value > maxVal) maxVal = p.value; }));
     if (maxVal === 0) maxVal = 1;
+
+    // Chart plot backdrop
+    const plotGradient = ctx.createLinearGradient(0, PAD.top, 0, PAD.top + chartH);
+    plotGradient.addColorStop(0, 'rgba(34, 76, 135, 0.08)');
+    plotGradient.addColorStop(1, 'rgba(34, 76, 135, 0.02)');
+    ctx.fillStyle = plotGradient;
+    ctx.fillRect(PAD.left, PAD.top, chartW, chartH);
 
     // Grid lines
     ctx.strokeStyle = '#e0e0e0';
@@ -776,6 +895,16 @@
       ctx.fillText(formatCorpusShort(val), PAD.left - 8, y + 4);
     }
     ctx.setLineDash([]);
+
+    // Axes
+    ctx.strokeStyle = 'rgba(27, 61, 110, 0.35)';
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.moveTo(PAD.left, PAD.top + chartH);
+    ctx.lineTo(PAD.left + chartW, PAD.top + chartH);
+    ctx.moveTo(PAD.left, PAD.top);
+    ctx.lineTo(PAD.left, PAD.top + chartH);
+    ctx.stroke();
 
     // X-axis labels
     ctx.textAlign = 'center';
@@ -830,6 +959,18 @@
           ctx.stroke();
         }
       });
+
+      // Endpoint emphasis
+      const end = series.points[series.points.length - 1];
+      const endX = PAD.left + (end.year / years) * chartW;
+      const endY = PAD.top + chartH - (end.value / maxVal) * chartH;
+      ctx.beginPath();
+      ctx.arc(endX, endY, idx === 1 ? 5.5 : 4.8, 0, Math.PI * 2);
+      ctx.fillStyle = series.color;
+      ctx.fill();
+      ctx.strokeStyle = '#ffffff';
+      ctx.lineWidth = 2.5;
+      ctx.stroke();
     });
 
     // --- Canvas Hover Tooltip (Scrubber) ---
@@ -837,30 +978,35 @@
     if (!tooltipEl) {
       tooltipEl = document.createElement('div');
       tooltipEl.id = 'chart-tooltip';
-      tooltipEl.style.cssText = 'position:absolute; background:#224c87; color:white; padding:8px 12px; border-radius:4px; font-size:12px; pointer-events:none; opacity:0; transition:opacity 0.2s; z-index:10; transform:translate(-50%, -100%); margin-top:-10px; font-family:Montserrat, sans-serif; box-shadow:0 4px 12px rgba(0,0,0,0.15);';
+      tooltipEl.style.cssText = 'position:absolute; background:rgba(10,47,102,0.96); color:white; padding:10px 12px; border-radius:10px; font-size:12px; pointer-events:none; opacity:0; transition:opacity 0.2s; z-index:10; transform:translate(-50%, -100%); margin-top:-12px; font-family:Montserrat, sans-serif; box-shadow:0 12px 24px rgba(0,0,0,0.24); min-width:180px;';
       canvas.parentNode.style.position = 'relative';
       canvas.parentNode.appendChild(tooltipEl);
     }
 
-    canvas.addEventListener('mousemove', function handleChartHover(e) {
+    canvas.onmousemove = function handleChartHover(e) {
       const rect = canvas.getBoundingClientRect();
       const mouseX = e.clientX - rect.left;
       if (mouseX >= PAD.left && mouseX <= PAD.left + chartW) {
         const pct = (mouseX - PAD.left) / chartW;
         const hoverYear = Math.round(pct * years);
-        const baselineSeries = seriesData[1];
-        const point = baselineSeries.points.find(p => p.year === hoverYear);
-        if (point) {
+        const cPoint = seriesData[0].points.find(p => p.year === hoverYear);
+        const bPoint = seriesData[1].points.find(p => p.year === hoverYear);
+        const oPoint = seriesData[2].points.find(p => p.year === hoverYear);
+        if (cPoint && bPoint && oPoint) {
           tooltipEl.style.opacity = '1';
           tooltipEl.style.left = mouseX + 'px';
           tooltipEl.style.top = (e.clientY - rect.top) + 'px';
-          tooltipEl.innerHTML = '<strong>Year ' + hoverYear + '</strong><br/>' + formatCurrency(Math.round(point.value));
+          tooltipEl.innerHTML =
+            '<strong style="display:block;margin-bottom:6px;">Year ' + hoverYear + '</strong>' +
+            '<div style="display:flex;justify-content:space-between;gap:10px;"><span style="color:#ffd180;">Conservative</span><strong>' + formatCorpusShort(cPoint.value) + '</strong></div>' +
+            '<div style="display:flex;justify-content:space-between;gap:10px;"><span style="color:#cde2ff;">Baseline</span><strong>' + formatCorpusShort(bPoint.value) + '</strong></div>' +
+            '<div style="display:flex;justify-content:space-between;gap:10px;"><span style="color:#c8f0d5;">Optimistic</span><strong>' + formatCorpusShort(oPoint.value) + '</strong></div>';
         }
       } else {
         tooltipEl.style.opacity = '0';
       }
-    });
-    canvas.addEventListener('mouseleave', function () { tooltipEl.style.opacity = '0'; });
+    };
+    canvas.onmouseleave = function () { tooltipEl.style.opacity = '0'; };
   }
 
   function formatCorpusShort(num) {
