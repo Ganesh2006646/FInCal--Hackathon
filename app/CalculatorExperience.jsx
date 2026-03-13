@@ -15,6 +15,7 @@ function extractBodyMarkup(htmlText) {
 }
 
 export default function CalculatorExperience() {
+  const basePath = process.env.NEXT_PUBLIC_BASE_PATH || '';
   const [markup, setMarkup] = useState('');
   const [showOverlay, setShowOverlay] = useState(false);
   const [overlayEntered, setOverlayEntered] = useState(false);
@@ -22,7 +23,7 @@ export default function CalculatorExperience() {
 
   useEffect(() => {
     let cancelled = false;
-    fetch('/legacy/index.html')
+    fetch(`${basePath}/legacy/index.html`)
       .then(response => response.text())
       .then(htmlText => {
         if (!cancelled) setMarkup(extractBodyMarkup(htmlText));
@@ -111,7 +112,7 @@ export default function CalculatorExperience() {
 
       {markup ? (
         <Script
-          src="/legacy/app.js"
+          src={`${basePath}/legacy/app.js`}
           strategy="afterInteractive"
           onLoad={() => setScriptReady(true)}
         />
