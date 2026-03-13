@@ -39,7 +39,7 @@
     const el = document.getElementById(id);
     if (el) {
       el.classList.add('active');
-      el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      el.scrollIntoView({ behavior: 'auto', block: 'start' });
       // Focus the heading for screen readers
       const heading = el.querySelector('h1, h2');
       if (heading) {
@@ -123,81 +123,6 @@
         preloader.style.visibility = 'hidden';
         setTimeout(function () { preloader.remove(); }, 600);
       }
-    });
-
-    // --- Custom Cursor (desktop only) ---
-    if (window.matchMedia('(pointer: fine)').matches) {
-      const dot = document.querySelector('.cursor-dot');
-      const outline = document.querySelector('.cursor-outline');
-
-      window.addEventListener('mousemove', function (e) {
-        const posX = e.clientX, posY = e.clientY;
-        dot.style.left = posX + 'px';
-        dot.style.top = posY + 'px';
-        outline.animate(
-          { left: posX + 'px', top: posY + 'px' },
-          { duration: 400, fill: 'forwards' }
-        );
-      });
-
-      // Magnetic hover effect on interactive elements
-      document.querySelectorAll('button, .ratio-card, .location-card, input[type="range"]').forEach(function (el) {
-        el.addEventListener('mouseenter', function () { document.body.classList.add('cursor-hover'); });
-        el.addEventListener('mouseleave', function () { document.body.classList.remove('cursor-hover'); });
-      });
-    }
-
-    // --- 3D Card Tilt Effect ---
-    document.querySelectorAll('.scenario-card, .panel-card').forEach(function (card) {
-      card.addEventListener('mousemove', function (e) {
-        var rect = card.getBoundingClientRect();
-        var x = e.clientX - rect.left;
-        var y = e.clientY - rect.top;
-        var rotateX = ((y - rect.height / 2) / (rect.height / 2)) * -8;
-        var rotateY = ((x - rect.width / 2) / (rect.width / 2)) * 8;
-        card.style.transform = 'perspective(1000px) rotateX(' + rotateX + 'deg) rotateY(' + rotateY + 'deg) scale3d(1.02, 1.02, 1.02)';
-        card.style.transition = 'none';
-      });
-      card.addEventListener('mouseleave', function () {
-        card.style.transform = 'perspective(1000px) rotateX(0deg) rotateY(0deg) scale3d(1, 1, 1)';
-        card.style.transition = 'transform 0.5s ease-out';
-      });
-    });
-
-    // --- Hero Parallax ---
-    var heroContent = document.querySelector('.hero-content');
-    window.addEventListener('mousemove', function (e) {
-      if (window.scrollY > 500 || !heroContent) return;
-      var moveX = (e.clientX - window.innerWidth / 2) * -0.02;
-      var moveY = (e.clientY - window.innerHeight / 2) * -0.02;
-      heroContent.style.transform = 'translate(' + moveX + 'px, ' + moveY + 'px)';
-    });
-
-    // --- Entrance Reveals (Intersection Observer) ---
-    var revealObserver = new IntersectionObserver(function (entries) {
-      entries.forEach(function (entry) {
-        if (entry.isIntersecting) {
-          entry.target.classList.add('active');
-          revealObserver.unobserve(entry.target);
-        }
-      });
-    }, { threshold: 0.1, rootMargin: '0px 0px -50px 0px' });
-
-    document.querySelectorAll('.panel-card, .scenario-card, .timeline-section, .final-cta').forEach(function (el, index) {
-      el.classList.add('reveal-up');
-      el.style.transitionDelay = (index * 0.1) + 's';
-      revealObserver.observe(el);
-    });
-
-    // --- Spotlight Glow Tracking ---
-    document.querySelectorAll('.scenario-card').forEach(card => {
-      card.addEventListener('mousemove', (e) => {
-        const rect = card.getBoundingClientRect();
-        const x = e.clientX - rect.left;
-        const y = e.clientY - rect.top;
-        card.style.setProperty('--mouse-x', `${x}px`);
-        card.style.setProperty('--mouse-y', `${y}px`);
-      });
     });
 
     // --- Power-User Keyboard Shortcuts ---
