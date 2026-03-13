@@ -1,0 +1,66 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630" width="1200" height="630">
+  <!-- Background gradient -->
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#eef4fd"/>
+      <stop offset="100%" stop-color="#d6e8ff"/>
+    </linearGradient>
+    <linearGradient id="card" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#ffffff" stop-opacity="0.9"/>
+      <stop offset="100%" stop-color="#f0f7ff" stop-opacity="0.9"/>
+    </linearGradient>
+  </defs>
+
+  <!-- BG -->
+  <rect width="1200" height="630" fill="url(#bg)"/>
+
+  <!-- Left accent bar -->
+  <rect x="0" y="0" width="8" height="630" fill="#224c87"/>
+
+  <!-- Card -->
+  <rect x="80" y="80" width="700" height="470" rx="20" fill="url(#card)" stroke="#c5d9f2" stroke-width="2"/>
+
+  <!-- Logo block -->
+  <rect x="116" y="120" width="52" height="52" rx="10" fill="#224c87"/>
+  <path d="M132 146h8v-12h6v12h8v6h-8v12h-6v-12h-8z" fill="#ffffff"/>
+  <text x="186" y="143" font-family="Arial,sans-serif" font-weight="700" font-size="18" fill="#224c87">HDFC Mutual Fund</text>
+  <text x="186" y="163" font-family="Arial,sans-serif" font-size="13" fill="#668ab5">Investor Education Initiative</text>
+
+  <!-- Headline -->
+  <text x="116" y="230" font-family="Arial,sans-serif" font-weight="800" font-size="42" fill="#0d2a52">Life-Proof</text>
+  <text x="116" y="282" font-family="Arial,sans-serif" font-weight="800" font-size="42" fill="#0d2a52">Retirement Planning</text>
+
+  <!-- Sub -->
+  <text x="116" y="340" font-family="Arial,sans-serif" font-size="22" fill="#3a5a8e">Healthcare · Geo-Arbitrage · Step-Up SIP</text>
+
+  <!-- Pill badges -->
+  <rect x="116" y="370" width="160" height="38" rx="19" fill="#224c87"/>
+  <text x="196" y="394" font-family="Arial,sans-serif" font-weight="700" font-size="15" fill="#ffffff" text-anchor="middle">Start ₹8,500/mo</text>
+
+  <rect x="292" y="370" width="160" height="38" rx="19" fill="#e3f2fd" stroke="#224c87" stroke-width="1.5"/>
+  <text x="372" y="394" font-family="Arial,sans-serif" font-weight="700" font-size="15" fill="#224c87" text-anchor="middle">Not ₹26,000/mo</text>
+
+  <!-- Right illustration: stacked corpus bars -->
+  <text x="880" y="160" font-family="Arial,sans-serif" font-weight="700" font-size="18" fill="#224c87" text-anchor="middle">Projected Corpus</text>
+
+  <!-- Bar: Conservative -->
+  <rect x="820" y="370" width="60" height="160" rx="6" fill="#f59e0b" opacity="0.85"/>
+  <text x="850" y="360" font-family="Arial,sans-serif" font-size="13" fill="#7a5200" text-anchor="middle">Conservative</text>
+  <text x="850" y="548" font-family="Arial,sans-serif" font-size="12" fill="#7a5200" text-anchor="middle">₹2.1Cr</text>
+
+  <!-- Bar: Baseline (tallest) -->
+  <rect x="900" y="240" width="60" height="290" rx="6" fill="#224c87"/>
+  <text x="930" y="230" font-family="Arial,sans-serif" font-size="13" fill="#224c87" text-anchor="middle">Baseline</text>
+  <text x="930" y="548" font-family="Arial,sans-serif" font-size="12" fill="#224c87" text-anchor="middle">₹4.8Cr</text>
+
+  <!-- Bar: Optimistic -->
+  <rect x="980" y="310" width="60" height="220" rx="6" fill="#16a34a" opacity="0.85"/>
+  <text x="1010" y="300" font-family="Arial,sans-serif" font-size="13" fill="#166534" text-anchor="middle">Optimistic</text>
+  <text x="1010" y="548" font-family="Arial,sans-serif" font-size="12" fill="#166534" text-anchor="middle">₹6.2Cr</text>
+
+  <!-- Baseline line -->
+  <line x1="800" y1="540" x2="1060" y2="540" stroke="#c5d9f2" stroke-width="2"/>
+
+  <!-- Bottom HDFC tagline -->
+  <text x="116" y="510" font-family="Arial,sans-serif" font-size="14" fill="#7a9cc0">Illustrative projections only. Not a scheme recommendation.</text>
+</svg>
