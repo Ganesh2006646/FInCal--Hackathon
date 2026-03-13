@@ -8,6 +8,7 @@
   let audioCtx = null;
   let journeyTimer = null;
   let narrativeTimer = null;
+  let storyTimer = null;
   let narrativeSequence = 0;
   let initialized = false;
 
@@ -699,7 +700,8 @@
 
     const futureExpense = calcFutureExpense(annualExpense, state.healthcareRatio, lifestyleInflation, medicalInflation, years);
     const targetCorpus = calcCorpus(futureExpense * geoModifier, postReturn, retirementYears);
-    const startingSIP = overrides.startingSIP ?? (state.whatIfSIP || (state.stepUpEnabled
+    const useManualSip = !overrides.ignoreWhatIfSIP && state.whatIfSIP !== null;
+    const startingSIP = overrides.startingSIP ?? (useManualSip ? state.whatIfSIP : (state.stepUpEnabled
       ? calcStepUpSIP(targetCorpus, baselineReturn, years, state.annualRaise, state.sipCeiling)
       : calcFlatSIP(targetCorpus, baselineReturn, years)));
     const baselineCorpus = state.stepUpEnabled
@@ -709,10 +711,11 @@
   }
 
   function updateStressTestCards() {
-    const current = evaluatePlan({});
-    const medical = evaluatePlan({ medicalInflation: 0.16 });
-    const early = evaluatePlan({ retireAge: Math.max(state.currentAge + 1, (state.whatIfRetireAge || state.retirementAge) - 3) });
-    const lower = evaluatePlan({ conservativeReturn: Math.max(0.01, state.conservativeReturn - 0.02), baselineReturn: Math.max(0.01, state.baselineReturn - 0.02), optimisticReturn: Math.max(0.01, state.optimisticReturn - 0.02) });
+    const baselineInput = { ignoreWhatIfSIP: true };
+    const current = evaluatePlan(baselineInput);
+    const medical = evaluatePlan({ ...baselineInput, medicalInflation: 0.16 });
+    const early = evaluatePlan({ ...baselineInput, retireAge: Math.max(state.currentAge + 1, (state.whatIfRetireAge || state.retirementAge) - 3) });
+    const lower = evaluatePlan({ ...baselineInput, conservativeReturn: Math.max(0.01, state.conservativeReturn - 0.02), baselineReturn: Math.max(0.01, state.baselineReturn - 0.02), optimisticReturn: Math.max(0.01, state.optimisticReturn - 0.02) });
 
     const medEl = document.getElementById('stress-medical');
     const earlyEl = document.getElementById('stress-early');
@@ -794,8 +797,49 @@
     state.demoTimers = [];
   }
 
+  function clearStoryTimer() {
+    if (storyTimer) {
+      clearTimeout(storyTimer);
+      storyTimer = null;
+    }
+  }
+
+  function playMilestoneStory() {
+    const storyEl = document.getElementById('milestone-story-text');
+    if (!storyEl) return;
+
+    const m1 = document.getElementById('milestone-1cr')?.textContent || 'Beyond horizon';
+    const m5 = document.getElementById('milestone-5cr')?.textContent || 'Beyond horizon';
+    const m10 = document.getElementById('milestone-10cr')?.textContent || 'Beyond horizon';
+    const fullText = 'Your baseline path reaches ₹1Cr by ' + m1 + ', scales to ₹5Cr by ' + m5 + ', and approaches ₹10Cr by ' + m10 + '. Use quick chips and stress tests to compare outcomes before deciding your final contribution path.';
+
+    clearStoryTimer();
+    storyEl.textContent = '';
+    storyEl.classList.add('story-playing');
+
+    let index = 0;
+    const tick = function () {
+      storyEl.textContent = fullText.slice(0, index);
+      index += 2;
+      if (index <= fullText.length) {
+        storyTimer = setTimeout(tick, 14);
+      } else {
+        storyEl.classList.remove('story-playing');
+        storyTimer = null;
+      }
+    };
+    tick();
+  }
+
   window.stopJudgeDemo = function () {
     clearDemoTimers();
+    clearStoryTimer();
+    const storyEl = document.getElementById('milestone-story-text');
+    if (storyEl) storyEl.classList.remove('story-playing');
+    if (journeyTimer) {
+      clearInterval(journeyTimer);
+      journeyTimer = null;
+    }
     const status = document.getElementById('demo-step-status');
     if (status) status.textContent = 'Demo stopped. You can run it again anytime.';
   };
@@ -805,7 +849,7 @@
     const status = document.getElementById('demo-step-status');
     if (status) status.textContent = fullSequence ? 'Preparing guided demo: baseline, geo shift, stress test, and recovery.' : 'Narrating your milestone story.';
     if (!fullSequence) {
-      updateMilestoneStory();
+      playMilestoneStory();
       return;
     }
 

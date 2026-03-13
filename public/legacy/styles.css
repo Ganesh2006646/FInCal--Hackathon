@@ -1158,18 +1158,18 @@ input[type="range"]:focus-visible {
 .decision-lab-grid {
   display: grid;
   grid-template-columns: 1.1fr 0.9fr;
-  gap: 26px;
-  margin-bottom: 36px;
+  gap: 24px;
+  margin-bottom: 32px;
 }
 
 .lab-card,
 .story-strip,
 .demo-mode-card {
-  background: rgba(246, 252, 255, 0.9);
-  border: 1px solid rgba(255, 255, 255, 0.45);
-  box-shadow: 0 16px 36px rgba(7, 34, 76, 0.16);
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.98) 0%, rgba(245, 251, 255, 0.96) 100%);
+  border: 1px solid rgba(34, 76, 135, 0.16);
+  box-shadow: 0 14px 30px rgba(9, 33, 70, 0.12);
   border-radius: var(--radius-xl);
-  padding: 28px;
+  padding: 26px;
 }
 
 .lab-card-header {
@@ -1197,16 +1197,28 @@ input[type="range"]:focus-visible {
 .stress-grid {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 12px;
+  gap: 14px;
 }
 
 .stress-card {
-  border: 1px solid rgba(34, 76, 135, 0.14);
-  background: rgba(255, 255, 255, 0.76);
+  border: 1px solid rgba(34, 76, 135, 0.18);
+  background: rgba(255, 255, 255, 0.92);
   border-radius: 14px;
-  padding: 16px;
+  padding: 16px 16px 14px;
   text-align: left;
   cursor: pointer;
+  transition: transform 180ms ease, box-shadow 220ms ease, border-color 220ms ease;
+}
+
+.stress-card:hover {
+  transform: translateY(-2px);
+  border-color: rgba(34, 76, 135, 0.42);
+  box-shadow: 0 10px 18px rgba(14, 40, 77, 0.12);
+}
+
+.stress-card:focus-visible {
+  outline: 3px solid rgba(34, 76, 135, 0.3);
+  outline-offset: 2px;
 }
 
 .stress-title,
@@ -1219,7 +1231,15 @@ input[type="range"]:focus-visible {
   margin-bottom: 6px;
 }
 
-.stress-card strong,
+.stress-card strong {
+  display: block;
+  font-size: clamp(34px, 3.4vw, 42px);
+  letter-spacing: -0.02em;
+  line-height: 1;
+  color: #19314f;
+  margin-bottom: 8px;
+}
+
 .snapshot-card strong {
   display: block;
   font-size: 18px;
@@ -1244,6 +1264,15 @@ input[type="range"]:focus-visible {
   align-items: center;
 }
 
+.snapshot-actions .btn-secondary,
+.demo-mode-actions .btn-secondary,
+.demo-mode-actions .btn-primary,
+.story-strip-header .btn-secondary {
+  min-height: 58px;
+  min-width: 210px;
+  border-radius: 12px;
+}
+
 .snapshot-compare-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -1254,20 +1283,20 @@ input[type="range"]:focus-visible {
 .snapshot-card {
   border-radius: 12px;
   padding: 16px;
-  background: rgba(34, 76, 135, 0.06);
-  border: 1px solid rgba(34, 76, 135, 0.12);
+  background: rgba(34, 76, 135, 0.08);
+  border: 1px solid rgba(34, 76, 135, 0.16);
 }
 
 .snapshot-diff {
   margin-top: 14px;
   padding: 14px 16px;
   border-radius: 12px;
-  background: rgba(255, 255, 255, 0.72);
-  border: 1px dashed rgba(34, 76, 135, 0.2);
+  background: rgba(255, 255, 255, 0.84);
+  border: 1px dashed rgba(34, 76, 135, 0.26);
 }
 
 .story-strip {
-  margin-bottom: 36px;
+  margin-bottom: 28px;
 }
 
 #milestone-story-text {
@@ -1277,8 +1306,21 @@ input[type="range"]:focus-visible {
   max-width: 60ch;
 }
 
+#milestone-story-text.story-playing {
+  border-right: 2px solid rgba(34, 76, 135, 0.4);
+  padding-right: 2px;
+}
+
 .demo-mode-card {
-  margin-bottom: 36px;
+  margin-bottom: 30px;
+}
+
+.demo-step-status {
+  margin-top: 12px;
+  padding: 12px 14px;
+  border-radius: 12px;
+  border: 1px solid rgba(34, 76, 135, 0.2);
+  background: rgba(255, 255, 255, 0.78);
 }
 
 /* Scenario Grid */
@@ -1753,6 +1795,8 @@ input[type="range"]:focus-visible {
   .scenario-card.elevated { transform: none; }
   .scenario-card.elevated:hover { transform: translateY(-4px); }
   .whatif-controls { grid-template-columns: 1fr; gap: 20px; }
+  .decision-lab-grid { grid-template-columns: 1fr; }
+  .stress-grid { grid-template-columns: 1fr; }
 }
 
 @media (max-width: 768px) {
@@ -1774,6 +1818,18 @@ input[type="range"]:focus-visible {
   .timeline-header-row { flex-direction: column; align-items: flex-start; }
   .card-header,
   .dashboard-header { margin-bottom: 28px; }
+  .snapshot-actions,
+  .demo-mode-actions,
+  .story-strip-header {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .snapshot-actions .btn-secondary,
+  .demo-mode-actions .btn-secondary,
+  .demo-mode-actions .btn-primary,
+  .story-strip-header .btn-secondary {
+    min-width: 100%;
+  }
 }
 
 @media (max-width: 480px) {
