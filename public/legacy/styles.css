@@ -53,7 +53,7 @@ body {
     linear-gradient(160deg, #0a2f66 0%, #123f7f 38%, #1f5f9b 68%, #2f79b8 100%);
   min-height: 100vh;
   overflow-x: hidden;
-  padding-bottom: 80px; /* footer space */
+  padding-bottom: 112px; /* reserve space for sticky legal footer */
 }
 
 /* Skip Link */
@@ -1715,8 +1715,10 @@ input[type="range"]:focus-visible {
   z-index: 1000;
   box-shadow: 0 -4px 12px rgba(0,0,0,0.1);
   transition: max-height 0.3s ease;
+  max-height: 168px;
   overflow: hidden;
 }
+.disclaimer-footer.collapsed { max-height: 56px; }
 .disclaimer-content {
   display: flex;
   align-items: flex-start;
@@ -1748,6 +1750,11 @@ input[type="range"]:focus-visible {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+}
+.disclaimer-footer.collapsed .disclaimer-content {
+  align-items: center;
+  padding-top: 10px;
+  padding-bottom: 10px;
 }
 .disclaimer-footer.collapsed .disclaimer-toggle svg {
   transform: rotate(180deg);
@@ -1806,6 +1813,7 @@ input[type="range"]:focus-visible {
   .disclaimer-text { font-size: 12px; }
   .toast { width: calc(100vw - 32px); }
   .toast-container { right: 16px; left: 16px; }
+  body { padding-bottom: 120px; }
 }
 
 /* ========== ADVANCED EFFECTS ========== */
