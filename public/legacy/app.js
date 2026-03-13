@@ -33,9 +33,29 @@
     whatIfRetireAge: null,
     whatIfPostRetirementReturn: null,
     whatIfRetirementDuration: null,
+    stressReference: {
+      retireAge: null,
+      conservativeReturnPct: null,
+      baselineReturnPct: null,
+      optimisticReturnPct: null,
+    },
     planSnapshots: { A: null, B: null },
     demoTimers: [],
   };
+
+  function updateStressReferenceFromUI() {
+    const retireAge = parseInt(document.getElementById('whatif-retire-age')?.value || state.retirementAge);
+    const conservativeReturnPct = parseFloat(document.getElementById('whatif-conservative-return')?.value || (state.conservativeReturn * 100));
+    const baselineReturnPct = parseFloat(document.getElementById('whatif-baseline-return')?.value || (state.baselineReturn * 100));
+    const optimisticReturnPct = parseFloat(document.getElementById('whatif-optimistic-return')?.value || (state.optimisticReturn * 100));
+
+    state.stressReference = {
+      retireAge,
+      conservativeReturnPct,
+      baselineReturnPct,
+      optimisticReturnPct,
+    };
+  }
 
   function prefersReducedMotion() {
     return window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -408,7 +428,8 @@
     setTimeout(drawChart, 400);
   };
 
-  window.onWhatIfChange = function () {
+  window.onWhatIfChange = function (source) {
+    const trigger = source || 'manual';
     const previousSnapshot = getWhatIfSnapshot();
     const sipVal = parseInt(document.getElementById('whatif-sip').value);
     const retireVal = parseInt(document.getElementById('whatif-retire-age').value);
@@ -442,6 +463,11 @@
     state.baselineReturn = baselineReturnVal / 100;
     state.optimisticReturn = optimisticReturnVal / 100;
     state.lifestyleInflation = lifestyleInflationVal / 100;
+
+    if (trigger !== 'stress') {
+      updateStressReferenceFromUI();
+    }
+
     runFullCalculation();
     drawChart();
     updateEverydayTranslator();
@@ -730,18 +756,23 @@
   }
 
   window.runStressTest = function (type) {
+    if (state.stressReference.retireAge === null) {
+      updateStressReferenceFromUI();
+    }
+
+    const ref = state.stressReference;
     if (type === 'medical-spike') {
       updateMedicalInflation(16);
       const medSlider = document.getElementById('medical-inflation');
       if (medSlider) { medSlider.value = 16; updateSliderTrack(medSlider); }
     } else if (type === 'retire-early') {
-      setRangeValue('whatif-retire-age', (parseInt(document.getElementById('whatif-retire-age').value) || state.retirementAge) - 3);
+      setRangeValue('whatif-retire-age', Math.max(state.currentAge + 1, ref.retireAge - 3));
     } else if (type === 'returns-lower') {
-      setRangeValue('whatif-conservative-return', (parseFloat(document.getElementById('whatif-conservative-return').value) || 0) - 2);
-      setRangeValue('whatif-baseline-return', (parseFloat(document.getElementById('whatif-baseline-return').value) || 0) - 2);
-      setRangeValue('whatif-optimistic-return', (parseFloat(document.getElementById('whatif-optimistic-return').value) || 0) - 2);
+      setRangeValue('whatif-conservative-return', Math.max(1, ref.conservativeReturnPct - 2));
+      setRangeValue('whatif-baseline-return', Math.max(1, ref.baselineReturnPct - 2));
+      setRangeValue('whatif-optimistic-return', Math.max(1, ref.optimisticReturnPct - 2));
     }
-    onWhatIfChange();
+    onWhatIfChange('stress');
     announceStatus('Stress test applied: ' + type.replace('-', ' ') + '.');
   };
 
