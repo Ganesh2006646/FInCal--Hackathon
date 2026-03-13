@@ -220,7 +220,7 @@
         e.preventDefault();
         calculateAndShowResults();
       }
-      if (['1','2','3','4'].includes(e.key) && !e.metaKey && !e.ctrlKey) {
+      if (['1', '2', '3', '4'].includes(e.key) && !e.metaKey && !e.ctrlKey) {
         goToStep(parseInt(e.key));
       }
     });
@@ -422,15 +422,18 @@
   // ===== STEP 4: CALCULATE & DISPLAY =====
   window.calculateAndShowResults = function () {
     showToast('success', 'Scenarios Calculated!', 'Your personalized retirement plan is ready. Review your three scenarios below.');
+    updateStressReferenceFromUI(); // Stabilize baseline before first dashboard view
     runFullCalculation();
     goToStep(4);
     setTimeout(animateCountUp, 200);
     setTimeout(drawChart, 400);
   };
 
-  window.onWhatIfChange = function (source) {
-    const trigger = source || 'manual';
+  window.onWhatIfChange = function (sourceElement) {
+    const trigger = sourceElement === 'stress' ? 'stress' : (sourceElement ? 'manual' : 'init');
     const previousSnapshot = getWhatIfSnapshot();
+
+    // Read all slider values
     const sipVal = parseInt(document.getElementById('whatif-sip').value);
     const retireVal = parseInt(document.getElementById('whatif-retire-age').value);
     const postReturnVal = parseFloat(document.getElementById('whatif-post-return').value);
@@ -439,6 +442,8 @@
     const baselineReturnVal = parseFloat(document.getElementById('whatif-baseline-return').value);
     const optimisticReturnVal = parseFloat(document.getElementById('whatif-optimistic-return').value);
     const lifestyleInflationVal = parseFloat(document.getElementById('whatif-lifestyle-inflation').value);
+
+    // Sync labels
     document.getElementById('whatif-sip-display').textContent = formatCurrency(sipVal);
     document.getElementById('whatif-retire-display').textContent = retireVal;
     document.getElementById('whatif-post-return-display').textContent = postReturnVal.toFixed(1) + '%';
@@ -447,15 +452,16 @@
     document.getElementById('whatif-baseline-return-display').textContent = baselineReturnVal.toFixed(1) + '%';
     document.getElementById('whatif-optimistic-return-display').textContent = optimisticReturnVal.toFixed(1) + '%';
     document.getElementById('whatif-lifestyle-inflation-display').textContent = lifestyleInflationVal.toFixed(1) + '%';
-    updateSliderTrack(document.getElementById('whatif-sip'));
-    updateSliderTrack(document.getElementById('whatif-retire-age'));
-    updateSliderTrack(document.getElementById('whatif-post-return'));
-    updateSliderTrack(document.getElementById('whatif-retirement-years'));
-    updateSliderTrack(document.getElementById('whatif-conservative-return'));
-    updateSliderTrack(document.getElementById('whatif-baseline-return'));
-    updateSliderTrack(document.getElementById('whatif-optimistic-return'));
-    updateSliderTrack(document.getElementById('whatif-lifestyle-inflation'));
-    state.whatIfSIP = sipVal;
+
+    // Update tracks
+    document.querySelectorAll('.whatif-panel input[type="range"]').forEach(updateSliderTrack);
+
+    // CRITICAL: Only "lock" the SIP value if the user specifically touched the SIP slider.
+    // Otherwise, let the calculator continue "solving" for the required SIP as other sliders move.
+    if (sourceElement && sourceElement.id === 'whatif-sip') {
+      state.whatIfSIP = sipVal;
+    }
+
     state.whatIfRetireAge = retireVal;
     state.whatIfPostRetirementReturn = postReturnVal / 100;
     state.whatIfRetirementDuration = retirementYearsVal;
@@ -624,7 +630,7 @@
     scenarios.forEach(sc => {
       let accumulated;
       if (state.stepUpEnabled) {
-        accumulated = calcStepUpAccumulation(startingSIP, sc.rate, years, state.annualRaise);
+        accumulated = calcStepUpAccumulation(startingSIP, sc.rate, years, state.annualRaise, state.sipCeiling);
       } else {
         accumulated = calcFlatAccumulation(startingSIP, sc.rate, years);
       }
@@ -664,10 +670,10 @@
     const healthText = state.healthcareRatio >= 0.25
       ? `buffering for ${(state.medicalInflation * 100).toFixed(1).replace('.0', '')}% medical inflation`
       : `using ${(state.lifestyleInflation * 100).toFixed(1).replace('.0', '')}% lifestyle inflation assumptions`;
-    const stepUpText = state.stepUpEnabled ? `leveraging your career growth with a ${Math.round(state.annualRaise*100)}% annual SIP step-up` : "using a flat monthly contribution";
-    
+    const stepUpText = state.stepUpEnabled ? `leveraging your career growth with a ${Math.round(state.annualRaise * 100)}% annual SIP step-up` : "using a flat monthly contribution";
+
     const narrativeString = `By planning to retire at ${state.whatIfRetireAge || state.retirementAge} and ${geoText}, you are shaping a realistic retirement path. You are ${healthText} and ${stepUpText}. This \u201CLife-Proof\u201D view is illustrative and helps you compare trade-offs responsibly.`;
-    
+
     narrativeEl.innerHTML = '';
     if (narrativeTimer) {
       clearTimeout(narrativeTimer);
@@ -735,17 +741,26 @@
       ? calcStepUpSIP(targetCorpus, baselineReturn, years, state.annualRaise, state.sipCeiling)
       : calcFlatSIP(targetCorpus, baselineReturn, years)));
     const baselineCorpus = state.stepUpEnabled
-      ? calcStepUpAccumulation(startingSIP, baselineReturn, years, state.annualRaise)
+      ? calcStepUpAccumulation(startingSIP, baselineReturn, years, state.annualRaise, state.sipCeiling)
       : calcFlatAccumulation(startingSIP, baselineReturn, years);
     return { years, targetCorpus, startingSIP, baselineCorpus, conservativeReturn, baselineReturn, optimisticReturn };
   }
 
   function updateStressTestCards() {
-    const baselineInput = { ignoreWhatIfSIP: true };
+    // Current Reference: Use the STABLE reference point saved when NOT in a stress test
+    const ref = state.stressReference;
+    const baselineInput = {
+      ignoreWhatIfSIP: true,
+      retireAge: ref.retireAge,
+      conservativeReturn: ref.conservativeReturnPct / 100,
+      baselineReturn: ref.baselineReturnPct / 100,
+      optimisticReturn: ref.optimisticReturnPct / 100
+    };
+
     const current = evaluatePlan(baselineInput);
     const medical = evaluatePlan({ ...baselineInput, medicalInflation: 0.16 });
-    const early = evaluatePlan({ ...baselineInput, retireAge: Math.max(state.currentAge + 1, (state.whatIfRetireAge || state.retirementAge) - 3) });
-    const lower = evaluatePlan({ ...baselineInput, conservativeReturn: Math.max(0.01, state.conservativeReturn - 0.02), baselineReturn: Math.max(0.01, state.baselineReturn - 0.02), optimisticReturn: Math.max(0.01, state.optimisticReturn - 0.02) });
+    const early = evaluatePlan({ ...baselineInput, retireAge: Math.max(state.currentAge + 1, baselineInput.retireAge - 3) });
+    const lower = evaluatePlan({ ...baselineInput, conservativeReturn: Math.max(0.01, baselineInput.conservativeReturn - 0.02), baselineReturn: Math.max(0.01, baselineInput.baselineReturn - 0.02), optimisticReturn: Math.max(0.01, baselineInput.optimisticReturn - 0.02) });
 
     const medEl = document.getElementById('stress-medical');
     const earlyEl = document.getElementById('stress-early');
@@ -798,9 +813,10 @@
   }
 
   window.savePlanSnapshot = function (slot) {
+    const currentRetireAge = state.whatIfRetireAge || state.retirementAge;
     const result = evaluatePlan({});
     const snapshot = {
-      title: formatCurrency(Math.round(result.startingSIP)) + '/mo at age ' + (state.whatIfRetireAge || state.retirementAge),
+      title: formatCurrency(Math.round(result.startingSIP)) + '/mo at age ' + currentRetireAge,
       meta: 'Target corpus ' + formatCorpus(result.targetCorpus) + ' | Lifestyle inflation ' + (state.lifestyleInflation * 100).toFixed(1) + '% | Geo ' + (state.geoModifier === 1 ? 'Metro' : state.geoModifier === 0.75 ? 'Tier-2' : 'Hometown'),
       sip: result.startingSIP,
       corpus: result.targetCorpus,
@@ -848,10 +864,10 @@
     const lowerRate = Math.max(0.01, state.baselineReturn - 0.01);
     const upperRate = state.baselineReturn + 0.01;
     const lowAccum = state.stepUpEnabled
-      ? calcStepUpAccumulation(startingSIP, lowerRate, years, state.annualRaise)
+      ? calcStepUpAccumulation(startingSIP, lowerRate, years, state.annualRaise, state.sipCeiling)
       : calcFlatAccumulation(startingSIP, lowerRate, years);
     const highAccum = state.stepUpEnabled
-      ? calcStepUpAccumulation(startingSIP, upperRate, years, state.annualRaise)
+      ? calcStepUpAccumulation(startingSIP, upperRate, years, state.annualRaise, state.sipCeiling)
       : calcFlatAccumulation(startingSIP, upperRate, years);
     returnSensitivityEl.textContent = '±1% return shifts corpus by about ' + formatCorpusShort(Math.abs(highAccum - lowAccum));
 
@@ -961,7 +977,7 @@
     let low = 100, high = 500000;
     for (let iter = 0; iter < 100; iter++) {
       const mid = (low + high) / 2;
-      const acc = calcStepUpAccumulation(mid, annualReturn, years, stepUpRate);
+      const acc = calcStepUpAccumulation(mid, annualReturn, years, stepUpRate, ceilingPct);
       if (acc < targetCorpus) low = mid;
       else high = mid;
       if (Math.abs(high - low) < 1) break;
@@ -970,19 +986,21 @@
   }
 
   // Accumulation with step-up (with SIP ceiling enforcement)
-  function calcStepUpAccumulation(initialSIP, annualReturn, years, stepUpRate) {
+  function calcStepUpAccumulation(initialSIP, annualReturn, years, stepUpRate, ceilingPct) {
     const monthlyReturn = annualReturn / 12;
     let total = 0;
     let sip = initialSIP;
-    // Cap SIP at 5x starting amount to model real-world salary ceiling
-    const maxAbsoluteSIP = initialSIP * 5;
+
+    // We model the SIP ceiling as a percentage of salary.
+    // Assuming starting SIP is ~10-15% of salary, 40% ceiling means SIP can grow ~3-4x.
+    // ceilingPct is 0.40 (40%), so ceiling multiplier is roughly ceilingPct * 10
+    const ceilingMultiplier = ceilingPct * 10;
+    const maxAbsoluteSIP = initialSIP * ceilingMultiplier;
 
     for (let y = 1; y <= years; y++) {
-      // FV of 12 months of SIP invested this year
       const yearFV = sip * ((Math.pow(1 + monthlyReturn, 12) - 1) / monthlyReturn) * (1 + monthlyReturn);
       const yearsRemaining = years - y;
       total += yearFV * Math.pow(1 + annualReturn, yearsRemaining);
-      // Apply the cap to the next year's SIP
       sip = Math.min(sip * (1 + stepUpRate), maxAbsoluteSIP);
     }
     return total;
