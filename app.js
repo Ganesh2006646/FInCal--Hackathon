@@ -141,6 +141,16 @@
     document.getElementById('inflation-years').textContent = years;
   }
 
+  function dismissPreloader() {
+    const preloader = document.getElementById('preloader');
+    if (!preloader) return;
+    preloader.style.opacity = '0';
+    preloader.style.visibility = 'hidden';
+    setTimeout(function () {
+      if (preloader.parentNode) preloader.remove();
+    }, 600);
+  }
+
   function initApp() {
     if (initialized) return;
     initialized = true;
@@ -179,14 +189,9 @@
     updateGeoVisual();
 
     // --- Preloader ---
-    window.addEventListener('load', function () {
-      const preloader = document.getElementById('preloader');
-      if (preloader) {
-        preloader.style.opacity = '0';
-        preloader.style.visibility = 'hidden';
-        setTimeout(function () { preloader.remove(); }, 600);
-      }
-    });
+    window.addEventListener('load', dismissPreloader);
+    // When embedded markup is injected after load, dismiss immediately.
+    setTimeout(dismissPreloader, 60);
 
     // --- Power-User Keyboard Shortcuts ---
     window.addEventListener('keydown', (e) => {
