@@ -1,0 +1,18 @@
+Accessibility Evidence Summary
+Generated: 2026-03-13T16:41:41.929Z
+Target URL: http://127.0.0.1:4173
+
+Automated Audit Results
+- Axe total violations: 5
+- Axe landing: 0 violation(s)
+- Axe step-1: 1 violation(s)
+- Axe step-2: 2 violation(s)
+- Axe step-3: 1 violation(s)
+- Axe step-4: 1 violation(s)
+- Lighthouse accessibility score: 100/100
+
+Manual Verification Required for Final Certification
+- Screen reader walkthrough (NVDA/JAWS/VoiceOver)
+- Keyboard-only walkthrough across all steps and modal states
+- Contrast validation for normal text, large text, icons, and focus states
+- Mobile/tablet touch target and orientation checks

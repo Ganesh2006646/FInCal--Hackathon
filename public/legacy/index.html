@@ -36,7 +36,7 @@
         </div>
       </header>
 
-      <main class="hero-content" id="calculator-main">
+      <div class="hero-content" id="calculator-main">
 
         <div class="hero-bg-elements" aria-hidden="true">
           <div class="glow-blob blob-1"></div>
@@ -93,12 +93,12 @@
             <span>Educational Tool</span>
           </div>
         </div>
-      </main>
+      </div>
     </div>
   </section>
 
   <!-- ========== STEP 1: BASELINE INFORMATION ========== -->
-  <section id="step-1" class="step" role="form" aria-labelledby="step1-heading">
+  <section id="step-1" class="step" aria-labelledby="step1-heading">
     <div class="card-container">
       <!-- Progress Indicator -->
       <div class="progress-bar" role="progressbar" aria-valuenow="1" aria-valuemin="1" aria-valuemax="4" aria-label="Step 1 of 4">
@@ -773,7 +773,7 @@
   <div id="toast-container" class="toast-container" aria-live="polite" aria-relevant="additions"></div>
 
   <!-- ========== STICKY DISCLAIMER FOOTER ========== -->
-  <footer class="disclaimer-footer" role="contentinfo" aria-label="Legal disclaimer">
+  <div class="disclaimer-footer" role="note" aria-label="Legal disclaimer">
     <div class="disclaimer-content">
       <svg class="disclaimer-icon" width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true"><circle cx="10" cy="10" r="9" stroke="#fff" stroke-width="1.5"/><path d="M10 6v5M10 13v1" stroke="#fff" stroke-width="1.5" stroke-linecap="round"/></svg>
       <p class="disclaimer-text" id="disclaimer-text">This tool has been designed for information purposes only. Actual results may vary depending on various factors involved in capital market. Investor should not consider above as a recommendation for any schemes of HDFC Mutual Fund. Past performance may or may not be sustained in future and is not a guarantee of any future returns.</p>
@@ -781,7 +781,7 @@
     <button class="disclaimer-toggle" id="disclaimer-toggle" onclick="toggleDisclaimer()" aria-label="Toggle disclaimer" aria-expanded="true">
       <svg width="24" height="24" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M6 9l6 6 6-6" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
     </button>
-  </footer>
+  </div>
 
   <script src="app.js"></script>
 </body>

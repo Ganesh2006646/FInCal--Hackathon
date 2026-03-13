@@ -1,0 +1,92 @@
+{
+  "generatedAt": "2026-03-13T16:41:21.813Z",
+  "tool": "axe-core via @axe-core/playwright",
+  "url": "http://127.0.0.1:4173",
+  "pages": [
+    {
+      "name": "landing",
+      "violations": [],
+      "violationCount": 0,
+      "passes": 38,
+      "incomplete": 1,
+      "inapplicable": 51
+    },
+    {
+      "name": "step-1",
+      "violations": [
+        {
+          "id": "color-contrast",
+          "impact": "serious",
+          "description": "Ensure the contrast between foreground and background colors meets WCAG 2 AA minimum contrast ratio thresholds",
+          "help": "Elements must meet minimum color contrast ratio thresholds",
+          "helpUrl": "https://dequeuniversity.com/rules/axe/4.10/color-contrast?application=playwright",
+          "nodeCount": 3
+        }
+      ],
+      "violationCount": 1,
+      "passes": 38,
+      "incomplete": 3,
+      "inapplicable": 50
+    },
+    {
+      "name": "step-2",
+      "violations": [
+        {
+          "id": "aria-prohibited-attr",
+          "impact": "serious",
+          "description": "Ensure ARIA attributes are not prohibited for an element's role",
+          "help": "Elements must only use permitted ARIA attributes",
+          "helpUrl": "https://dequeuniversity.com/rules/axe/4.10/aria-prohibited-attr?application=playwright",
+          "nodeCount": 1
+        },
+        {
+          "id": "color-contrast",
+          "impact": "serious",
+          "description": "Ensure the contrast between foreground and background colors meets WCAG 2 AA minimum contrast ratio thresholds",
+          "help": "Elements must meet minimum color contrast ratio thresholds",
+          "helpUrl": "https://dequeuniversity.com/rules/axe/4.10/color-contrast?application=playwright",
+          "nodeCount": 9
+        }
+      ],
+      "violationCount": 2,
+      "passes": 38,
+      "incomplete": 2,
+      "inapplicable": 50
+    },
+    {
+      "name": "step-3",
+      "violations": [
+        {
+          "id": "color-contrast",
+          "impact": "serious",
+          "description": "Ensure the contrast between foreground and background colors meets WCAG 2 AA minimum contrast ratio thresholds",
+          "help": "Elements must meet minimum color contrast ratio thresholds",
+          "helpUrl": "https://dequeuniversity.com/rules/axe/4.10/color-contrast?application=playwright",
+          "nodeCount": 11
+        }
+      ],
+      "violationCount": 1,
+      "passes": 38,
+      "incomplete": 2,
+      "inapplicable": 50
+    },
+    {
+      "name": "step-4",
+      "violations": [
+        {
+          "id": "color-contrast",
+          "impact": "serious",
+          "description": "Ensure the contrast between foreground and background colors meets WCAG 2 AA minimum contrast ratio thresholds",
+          "help": "Elements must meet minimum color contrast ratio thresholds",
+          "helpUrl": "https://dequeuniversity.com/rules/axe/4.10/color-contrast?application=playwright",
+          "nodeCount": 11
+        }
+      ],
+      "violationCount": 1,
+      "passes": 41,
+      "incomplete": 3,
+      "inapplicable": 47
+    }
+  ],
+  "violationCount": 5
+}

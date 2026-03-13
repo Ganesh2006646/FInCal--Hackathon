@@ -1,0 +1,43 @@
+Manual WCAG 2.1 AA Audit Checklist
+
+Project: Life-Proof Retirement Calculator
+Date: __________________
+Auditor: _______________
+Build/URL: _____________
+
+1) Screen Reader Compatibility
+- NVDA (Windows): Pass / Fail / Needs Fix
+- JAWS (Windows): Pass / Fail / Needs Fix
+- VoiceOver (macOS/iOS): Pass / Fail / Needs Fix
+- Findings:
+
+2) Keyboard Navigation
+- Tab/Shift+Tab reaches all actionable controls in logical order: Pass / Fail / Needs Fix
+- Focus indicator visible on all interactive controls: Pass / Fail / Needs Fix
+- Enter/Space activate buttons and chips: Pass / Fail / Needs Fix
+- Modal/dialog focus trapping and escape handling (if present): Pass / Fail / Needs Fix
+- Findings:
+
+3) Color and Contrast
+- Normal text contrast >= 4.5:1: Pass / Fail / Needs Fix
+- Large text contrast >= 3:1: Pass / Fail / Needs Fix
+- UI components/focus indicators >= 3:1: Pass / Fail / Needs Fix
+- Findings:
+
+4) Forms and Error States
+- Every form control has a visible programmatic label: Pass / Fail / Needs Fix
+- Error states announced and linked to fields: Pass / Fail / Needs Fix
+- Required fields are clear to visual and assistive users: Pass / Fail / Needs Fix
+- Findings:
+
+5) Responsive and Touch Accessibility
+- Desktop layout stable and usable: Pass / Fail / Needs Fix
+- Tablet layout stable and usable: Pass / Fail / Needs Fix
+- Mobile layout stable and usable: Pass / Fail / Needs Fix
+- Touch targets are comfortably tappable (~44px): Pass / Fail / Needs Fix
+- Landscape/portrait orientation checks: Pass / Fail / Needs Fix
+- Findings:
+
+Final Decision
+- WCAG 2.1 AA Status: Pass / Conditional Pass / Fail
+- Follow-up Issues:
