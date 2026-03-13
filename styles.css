@@ -1163,8 +1163,7 @@ input[type="range"]:focus-visible {
 }
 
 .lab-card,
-.story-strip,
-.demo-mode-card {
+.lab-card {
   background: linear-gradient(180deg, rgba(255, 255, 255, 0.98) 0%, rgba(245, 251, 255, 0.96) 100%);
   border: 1px solid rgba(34, 76, 135, 0.16);
   box-shadow: 0 14px 30px rgba(9, 33, 70, 0.12);
@@ -1176,8 +1175,7 @@ input[type="range"]:focus-visible {
   margin-bottom: 18px;
 }
 
-.lab-card-header h3,
-.story-strip-header h3 {
+.lab-card-header h3 {
   font-family: var(--font-heading);
   font-size: clamp(22px, 2.2vw, 26px);
   line-height: var(--line-heading);
@@ -1186,9 +1184,7 @@ input[type="range"]:focus-visible {
   margin-bottom: 6px;
 }
 
-.lab-card-header p,
-.story-strip p,
-.demo-step-status {
+.lab-card-header p {
   color: #5e718a;
   line-height: var(--line-copy);
   max-width: 58ch;
@@ -1255,19 +1251,14 @@ input[type="range"]:focus-visible {
   line-height: 1.45;
 }
 
-.snapshot-actions,
-.demo-mode-actions,
-.story-strip-header {
+.snapshot-actions {
   display: flex;
   gap: 12px;
   justify-content: space-between;
   align-items: center;
 }
 
-.snapshot-actions .btn-secondary,
-.demo-mode-actions .btn-secondary,
-.demo-mode-actions .btn-primary,
-.story-strip-header .btn-secondary {
+.snapshot-actions .btn-secondary {
   min-height: 58px;
   min-width: 210px;
   border-radius: 12px;
@@ -1293,34 +1284,6 @@ input[type="range"]:focus-visible {
   border-radius: 12px;
   background: rgba(255, 255, 255, 0.84);
   border: 1px dashed rgba(34, 76, 135, 0.26);
-}
-
-.story-strip {
-  margin-bottom: 28px;
-}
-
-#milestone-story-text {
-  color: #23405f;
-  font-size: 16px;
-  line-height: 1.72;
-  max-width: 60ch;
-}
-
-#milestone-story-text.story-playing {
-  border-right: 2px solid rgba(34, 76, 135, 0.4);
-  padding-right: 2px;
-}
-
-.demo-mode-card {
-  margin-bottom: 30px;
-}
-
-.demo-step-status {
-  margin-top: 12px;
-  padding: 12px 14px;
-  border-radius: 12px;
-  border: 1px solid rgba(34, 76, 135, 0.2);
-  background: rgba(255, 255, 255, 0.78);
 }
 
 /* Scenario Grid */
@@ -1818,16 +1781,11 @@ input[type="range"]:focus-visible {
   .timeline-header-row { flex-direction: column; align-items: flex-start; }
   .card-header,
   .dashboard-header { margin-bottom: 28px; }
-  .snapshot-actions,
-  .demo-mode-actions,
-  .story-strip-header {
+  .snapshot-actions {
     flex-direction: column;
     align-items: stretch;
   }
-  .snapshot-actions .btn-secondary,
-  .demo-mode-actions .btn-secondary,
-  .demo-mode-actions .btn-primary,
-  .story-strip-header .btn-secondary {
+  .snapshot-actions .btn-secondary {
     min-width: 100%;
   }
 }

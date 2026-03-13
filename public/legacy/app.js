@@ -8,7 +8,6 @@
   let audioCtx = null;
   let journeyTimer = null;
   let narrativeTimer = null;
-  let storyTimer = null;
   let narrativeSequence = 0;
   let initialized = false;
 
@@ -796,104 +795,6 @@
     state.demoTimers.forEach(timer => clearTimeout(timer));
     state.demoTimers = [];
   }
-
-  function clearStoryTimer() {
-    if (storyTimer) {
-      clearTimeout(storyTimer);
-      storyTimer = null;
-    }
-  }
-
-  function playMilestoneStory() {
-    const storyEl = document.getElementById('milestone-story-text');
-    if (!storyEl) return;
-
-    const m1 = document.getElementById('milestone-1cr')?.textContent || 'Beyond horizon';
-    const m5 = document.getElementById('milestone-5cr')?.textContent || 'Beyond horizon';
-    const m10 = document.getElementById('milestone-10cr')?.textContent || 'Beyond horizon';
-    const fullText = 'Your baseline path reaches ₹1Cr by ' + m1 + ', scales to ₹5Cr by ' + m5 + ', and approaches ₹10Cr by ' + m10 + '. Use quick chips and stress tests to compare outcomes before deciding your final contribution path.';
-
-    clearStoryTimer();
-    storyEl.textContent = '';
-    storyEl.classList.add('story-playing');
-
-    let index = 0;
-    const tick = function () {
-      storyEl.textContent = fullText.slice(0, index);
-      index += 2;
-      if (index <= fullText.length) {
-        storyTimer = setTimeout(tick, 14);
-      } else {
-        storyEl.classList.remove('story-playing');
-        storyTimer = null;
-      }
-    };
-    tick();
-  }
-
-  window.stopJudgeDemo = function () {
-    clearDemoTimers();
-    clearStoryTimer();
-    const storyEl = document.getElementById('milestone-story-text');
-    if (storyEl) storyEl.classList.remove('story-playing');
-    if (journeyTimer) {
-      clearInterval(journeyTimer);
-      journeyTimer = null;
-    }
-    const status = document.getElementById('demo-step-status');
-    if (status) status.textContent = 'Demo stopped. You can run it again anytime.';
-  };
-
-  window.runJudgeDemo = function (fullSequence) {
-    clearDemoTimers();
-    const status = document.getElementById('demo-step-status');
-    if (status) status.textContent = fullSequence ? 'Preparing guided demo: baseline, geo shift, stress test, and recovery.' : 'Narrating your milestone story.';
-    if (!fullSequence) {
-      playMilestoneStory();
-      return;
-    }
-
-    const stepLeadIn = 480;
-    const stepInterval = 3200;
-    const steps = [
-      function () {
-        applyLocationModifier(1.0);
-        setRangeValue('whatif-retire-age', 60);
-        setRangeValue('whatif-sip', 8500);
-        onWhatIfChange();
-        if (status) status.textContent = 'Demo step 1: Metro retirement baseline.';
-      },
-      function () {
-        applyLocationModifier(0.75);
-        setRangeValue('whatif-retire-age', 63);
-        onWhatIfChange();
-        if (status) status.textContent = 'Demo step 2: Tier-2 move plus delayed retirement improves the plan.';
-      },
-      function () {
-        runStressTest('medical-spike');
-        if (status) status.textContent = 'Demo step 3: Medical inflation shock stress test.';
-      },
-      function () {
-        setRangeValue('whatif-sip', 10500);
-        setRangeValue('whatif-baseline-return', 12);
-        updateMedicalInflation(14);
-        const medSlider = document.getElementById('medical-inflation');
-        if (medSlider) { medSlider.value = 14; updateSliderTrack(medSlider); }
-        onWhatIfChange();
-        if (status) status.textContent = 'Demo step 4: Recovery with a slightly higher SIP and normalized healthcare assumption.';
-      }
-    ];
-
-    steps.forEach((step, index) => {
-      const timer = setTimeout(step, stepLeadIn + index * stepInterval);
-      state.demoTimers.push(timer);
-    });
-
-    const endTimer = setTimeout(() => {
-      if (status) status.textContent = 'Demo complete. You can now tweak assumptions, save snapshots, or rerun the walkthrough.';
-    }, stepLeadIn + steps.length * stepInterval + 320);
-    state.demoTimers.push(endTimer);
-  };
 
   function updateInsightStrip(targetCorpus, startingSIP, years) {
     const inflationImpactEl = document.getElementById('insight-inflation-impact');

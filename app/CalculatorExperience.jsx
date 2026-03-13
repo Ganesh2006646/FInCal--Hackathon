@@ -72,13 +72,6 @@ export default function CalculatorExperience() {
     });
   }
 
-  function runDemo() {
-    closeOverlay(() => {
-      window.goToStep?.(4);
-      window.setTimeout(() => window.runJudgeDemo?.(true), 900);
-    });
-  }
-
   function dismiss() {
     closeOverlay();
   }
@@ -92,8 +85,8 @@ export default function CalculatorExperience() {
       {showOverlay ? (
         <div className={`judge-onboarding${overlayEntered ? ' visible' : ''}`} role="dialog" aria-modal="true" aria-labelledby="judge-overlay-heading">
           <div className="judge-onboarding-card">
-            <span className="judge-onboarding-eyebrow">Judge Demo Guide</span>
-            <h2 id="judge-overlay-heading">Start with a polished walkthrough</h2>
+            <span className="judge-onboarding-eyebrow">Quick Start Guide</span>
+            <h2 id="judge-overlay-heading">Start planning in under a minute</h2>
             <p>
               This experience is designed to show why your retirement plan changes when healthcare costs,
               city choice, inflation, and income growth are treated realistically.
@@ -107,14 +100,9 @@ export default function CalculatorExperience() {
                 <strong>2. Decision lab</strong>
                 <span>Stress tests, snapshots, and quick chips make the tool feel alive.</span>
               </div>
-              <div className="judge-point">
-                <strong>3. Storytelling</strong>
-                <span>Milestones, deltas, and the guided demo explain the impact instantly.</span>
-              </div>
             </div>
             <div className="judge-onboarding-actions">
               <button className="btn-primary" onClick={startPlanning}>Start Planning</button>
-              <button className="btn-secondary" onClick={runDemo}>Run Judge Demo</button>
               <button className="btn-secondary-light" onClick={dismiss}>Dismiss</button>
             </div>
           </div>
