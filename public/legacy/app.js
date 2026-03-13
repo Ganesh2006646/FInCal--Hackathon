@@ -5,6 +5,9 @@
 (function () {
   'use strict';
 
+  let audioCtx = null;
+  let journeyTimer = null;
+
   // ===== STATE =====
   const state = {
     currentAge: 28,
@@ -19,6 +22,9 @@
     sipCeiling: 0.40,         // % of salary
     postRetirementReturn: 0.07,
     retirementDuration: 25,
+    conservativeReturn: 0.06,
+    baselineReturn: 0.12,
+    optimisticReturn: 0.15,
     // What-If overrides
     whatIfSIP: null,
     whatIfRetireAge: null,
@@ -103,7 +109,11 @@
 
     // Init slider styles for all range inputs
     document.querySelectorAll('input[type="range"]').forEach(s => updateSliderTrack(s));
+    document.querySelectorAll('input[type="range"]').forEach(slider => {
+      slider.addEventListener('input', playTick);
+    });
     syncStep1UI();
+    updateGeoVisual();
 
     // --- Preloader ---
     window.addEventListener('load', function () {
@@ -262,6 +272,7 @@
     el.setAttribute('aria-checked', 'true');
     state.geoModifier = value;
     updateGeoImpact();
+    updateGeoVisual();
   };
 
   function updateGeoImpact() {
@@ -273,6 +284,34 @@
     } else {
       txt.textContent = 'Choosing Hometown/Countryside reduces your required corpus by ~₹7 Lakhs';
     }
+  }
+
+  function updateGeoVisual() {
+    const visual = document.getElementById('geo-visual');
+    if (!visual) return;
+    if (state.geoModifier === 1.0) visual.setAttribute('data-mode', 'metro');
+    else if (state.geoModifier === 0.75) visual.setAttribute('data-mode', 'tier2');
+    else visual.setAttribute('data-mode', 'rural');
+  }
+
+  function playTick() {
+    const Ctx = window.AudioContext || window.webkitAudioContext;
+    if (!Ctx) return;
+    if (!audioCtx) audioCtx = new Ctx();
+    if (audioCtx.state === 'suspended') {
+      audioCtx.resume();
+    }
+    const osc = audioCtx.createOscillator();
+    const gainNode = audioCtx.createGain();
+    osc.type = 'sine';
+    osc.frequency.setValueAtTime(800, audioCtx.currentTime);
+    osc.frequency.exponentialRampToValueAtTime(40, audioCtx.currentTime + 0.04);
+    gainNode.gain.setValueAtTime(0.03, audioCtx.currentTime);
+    gainNode.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.04);
+    osc.connect(gainNode);
+    gainNode.connect(audioCtx.destination);
+    osc.start();
+    osc.stop(audioCtx.currentTime + 0.04);
   }
 
   // ===== STEP 3 =====
@@ -315,12 +354,12 @@
     const annualExpense = state.monthlyExpenses * 12;
     const futureExpense = calcFutureExpense(annualExpense, state.healthcareRatio, state.lifestyleInflation, state.medicalInflation, years);
     const geoAdjusted = futureExpense * state.geoModifier;
-    const corpus = calcCorpus(geoAdjusted, 0.07, 25);
+    const corpus = calcCorpus(geoAdjusted, state.postRetirementReturn, state.retirementDuration);
 
     // Traditional (flat) SIP
-    const tradSIP = calcFlatSIP(corpus, 0.12, years);
+    const tradSIP = calcFlatSIP(corpus, state.baselineReturn, years);
     // Step-Up SIP
-    const stepSIP = state.stepUpEnabled ? calcStepUpSIP(corpus, 0.12, years, state.annualRaise, state.sipCeiling) : tradSIP;
+    const stepSIP = state.stepUpEnabled ? calcStepUpSIP(corpus, state.baselineReturn, years, state.annualRaise, state.sipCeiling) : tradSIP;
 
     // Update comparison UI
     document.getElementById('trad-sip').innerHTML = formatCurrency(Math.round(tradSIP)) + '<span>/mo</span>';
@@ -357,20 +396,33 @@
     const retireVal = parseInt(document.getElementById('whatif-retire-age').value);
     const postReturnVal = parseFloat(document.getElementById('whatif-post-return').value);
     const retirementYearsVal = parseInt(document.getElementById('whatif-retirement-years').value);
+    const conservativeReturnVal = parseFloat(document.getElementById('whatif-conservative-return').value);
+    const baselineReturnVal = parseFloat(document.getElementById('whatif-baseline-return').value);
+    const optimisticReturnVal = parseFloat(document.getElementById('whatif-optimistic-return').value);
     document.getElementById('whatif-sip-display').textContent = formatCurrency(sipVal);
     document.getElementById('whatif-retire-display').textContent = retireVal;
     document.getElementById('whatif-post-return-display').textContent = postReturnVal.toFixed(1) + '%';
     document.getElementById('whatif-retirement-years-display').textContent = retirementYearsVal;
+    document.getElementById('whatif-conservative-return-display').textContent = conservativeReturnVal.toFixed(1) + '%';
+    document.getElementById('whatif-baseline-return-display').textContent = baselineReturnVal.toFixed(1) + '%';
+    document.getElementById('whatif-optimistic-return-display').textContent = optimisticReturnVal.toFixed(1) + '%';
     updateSliderTrack(document.getElementById('whatif-sip'));
     updateSliderTrack(document.getElementById('whatif-retire-age'));
     updateSliderTrack(document.getElementById('whatif-post-return'));
     updateSliderTrack(document.getElementById('whatif-retirement-years'));
+    updateSliderTrack(document.getElementById('whatif-conservative-return'));
+    updateSliderTrack(document.getElementById('whatif-baseline-return'));
+    updateSliderTrack(document.getElementById('whatif-optimistic-return'));
     state.whatIfSIP = sipVal;
     state.whatIfRetireAge = retireVal;
     state.whatIfPostRetirementReturn = postReturnVal / 100;
     state.whatIfRetirementDuration = retirementYearsVal;
+    state.conservativeReturn = conservativeReturnVal / 100;
+    state.baselineReturn = baselineReturnVal / 100;
+    state.optimisticReturn = optimisticReturnVal / 100;
     runFullCalculation();
     drawChart();
+    updateEverydayTranslator();
   };
 
   function runFullCalculation() {
@@ -385,9 +437,9 @@
     const targetCorpus = calcCorpus(geoAdjusted, postReturnRate, retirementDuration);
 
     const scenarios = [
-      { rate: 0.06, id: 'conservative', label: 'Conservative' },
-      { rate: 0.12, id: 'baseline', label: 'Baseline' },
-      { rate: 0.15, id: 'optimistic', label: 'Optimistic' },
+      { rate: state.conservativeReturn, id: 'conservative', label: 'Conservative' },
+      { rate: state.baselineReturn, id: 'baseline', label: 'Baseline' },
+      { rate: state.optimisticReturn, id: 'optimistic', label: 'Optimistic' },
     ];
 
     // Determine starting SIP
@@ -395,9 +447,9 @@
     if (state.whatIfSIP) {
       startingSIP = state.whatIfSIP;
     } else if (state.stepUpEnabled) {
-      startingSIP = calcStepUpSIP(targetCorpus, 0.12, years, state.annualRaise, state.sipCeiling);
+      startingSIP = calcStepUpSIP(targetCorpus, state.baselineReturn, years, state.annualRaise, state.sipCeiling);
     } else {
-      startingSIP = calcFlatSIP(targetCorpus, 0.12, years);
+      startingSIP = calcFlatSIP(targetCorpus, state.baselineReturn, years);
     }
 
     // What-If sliders sync
@@ -424,6 +476,24 @@
       retirementYearsSlider.value = state.retirementDuration;
       document.getElementById('whatif-retirement-years-display').textContent = state.retirementDuration;
       updateSliderTrack(retirementYearsSlider);
+    }
+    const conservativeReturnSlider = document.getElementById('whatif-conservative-return');
+    if (conservativeReturnSlider) {
+      conservativeReturnSlider.value = state.conservativeReturn * 100;
+      document.getElementById('whatif-conservative-return-display').textContent = (state.conservativeReturn * 100).toFixed(1) + '%';
+      updateSliderTrack(conservativeReturnSlider);
+    }
+    const baselineReturnSlider = document.getElementById('whatif-baseline-return');
+    if (baselineReturnSlider) {
+      baselineReturnSlider.value = state.baselineReturn * 100;
+      document.getElementById('whatif-baseline-return-display').textContent = (state.baselineReturn * 100).toFixed(1) + '%';
+      updateSliderTrack(baselineReturnSlider);
+    }
+    const optimisticReturnSlider = document.getElementById('whatif-optimistic-return');
+    if (optimisticReturnSlider) {
+      optimisticReturnSlider.value = state.optimisticReturn * 100;
+      document.getElementById('whatif-optimistic-return-display').textContent = (state.optimisticReturn * 100).toFixed(1) + '%';
+      updateSliderTrack(optimisticReturnSlider);
     }
 
     // Summary
@@ -453,6 +523,9 @@
       const el = document.getElementById(id);
       if (el) el.textContent = 'Years in retirement: ' + retirementDuration;
     });
+    document.getElementById('assumption-pre-c').innerHTML = 'Pre-retirement return: <strong>' + (state.conservativeReturn * 100).toFixed(1) + '%</strong>';
+    document.getElementById('assumption-pre-b').innerHTML = 'Pre-retirement return: <strong>' + (state.baselineReturn * 100).toFixed(1) + '%</strong>';
+    document.getElementById('assumption-pre-o').innerHTML = 'Pre-retirement return: <strong>' + (state.optimisticReturn * 100).toFixed(1) + '%</strong>';
 
     // Calculate each scenario
     scenarios.forEach(sc => {
@@ -511,7 +584,67 @@
     setTimeout(typeWriter, 800);
 
     updateURLState();
+    updateEverydayTranslator();
   }
+
+  function updateEverydayTranslator() {
+    const translatorEl = document.getElementById('everyday-translator');
+    const transText = document.getElementById('translator-text');
+    const sipInput = document.getElementById('whatif-sip');
+    if (!translatorEl || !transText || !sipInput) return;
+
+    const currentSip = parseInt(sipInput.value) || 0;
+    const diff = currentSip - 8500;
+    const years = (state.whatIfRetireAge || state.retirementAge) - state.currentAge;
+
+    if (diff > 0 && years > 0) {
+      const coffees = Math.max(1, Math.floor(diff / 300));
+      const extraCorpus = calcFlatAccumulation(diff, state.baselineReturn, years);
+      translatorEl.classList.add('show');
+      transText.innerHTML = 'Adding ' + formatCurrency(diff) + '/mo is roughly <strong>' + coffees + ' cafe visits</strong>, but it adds <strong>' + formatCorpus(extraCorpus) + '</strong> to your retirement!';
+    } else if (diff < 0 && years > 0) {
+      const reducedCorpus = calcFlatAccumulation(Math.abs(diff), state.baselineReturn, years);
+      translatorEl.classList.add('show');
+      transText.innerHTML = 'Reducing SIP by ' + formatCurrency(Math.abs(diff)) + '/mo may lower your Baseline corpus by <strong>' + formatCorpus(reducedCorpus) + '</strong>.';
+    } else {
+      translatorEl.classList.remove('show');
+    }
+  }
+
+  window.playJourney = function () {
+    const years = (state.whatIfRetireAge || state.retirementAge) - state.currentAge;
+    const canvas = document.getElementById('growthCanvas');
+    const scrubber = document.getElementById('chart-scrubber-line');
+    if (!canvas || !scrubber || years <= 0) return;
+
+    const rect = canvas.getBoundingClientRect();
+    const PAD = { left: 80, right: 30 };
+    const chartW = rect.width - PAD.left - PAD.right;
+    let currentYear = 0;
+
+    if (journeyTimer) clearInterval(journeyTimer);
+    scrubber.style.opacity = '1';
+
+    journeyTimer = setInterval(() => {
+      if (currentYear > years) {
+        clearInterval(journeyTimer);
+        journeyTimer = null;
+        scrubber.style.opacity = '0';
+        canvas.dispatchEvent(new MouseEvent('mouseleave'));
+        return;
+      }
+
+      const simulatedX = PAD.left + (currentYear / years) * chartW;
+      scrubber.style.left = simulatedX + 'px';
+
+      const event = new MouseEvent('mousemove', {
+        clientX: rect.left + simulatedX,
+        clientY: rect.top + 100
+      });
+      canvas.dispatchEvent(event);
+      currentYear++;
+    }, 90);
+  };
 
   // --- Dynamic URL Generation ---
   function updateURLState() {
@@ -522,6 +655,9 @@
     params.set('geo', state.geoModifier);
     params.set('post', (state.whatIfPostRetirementReturn || state.postRetirementReturn).toFixed(3));
     params.set('ryears', (state.whatIfRetirementDuration || state.retirementDuration));
+    params.set('rc', state.conservativeReturn.toFixed(3));
+    params.set('rb', state.baselineReturn.toFixed(3));
+    params.set('ro', state.optimisticReturn.toFixed(3));
     const newURL = `${window.location.pathname}?${params.toString()}`;
     window.history.replaceState({}, '', newURL);
   }
@@ -649,9 +785,9 @@
 
     const startingSIP = parseInt(document.getElementById('whatif-sip').value) || 8500;
     const rates = [
-      { rate: 0.06, color: '#ff9800', label: 'Conservative' },
-      { rate: 0.12, color: '#224c87', label: 'Baseline' },
-      { rate: 0.15, color: '#2e7d32', label: 'Optimistic' },
+      { rate: state.conservativeReturn, color: '#ff9800', label: 'Conservative' },
+      { rate: state.baselineReturn, color: '#224c87', label: 'Baseline' },
+      { rate: state.optimisticReturn, color: '#2e7d32', label: 'Optimistic' },
     ];
 
     // Compute data points for each scenario
