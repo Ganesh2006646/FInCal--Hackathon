@@ -1,7 +1,6 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import Script from 'next/script';
 
 function extractBodyMarkup(htmlText) {
   try {
@@ -19,7 +18,6 @@ export default function CalculatorExperience() {
   const [markup, setMarkup] = useState('');
   const [showOverlay, setShowOverlay] = useState(false);
   const [overlayEntered, setOverlayEntered] = useState(false);
-  const [scriptReady, setScriptReady] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
@@ -43,10 +41,27 @@ export default function CalculatorExperience() {
   }, []);
 
   useEffect(() => {
-    if (markup && scriptReady && typeof window !== 'undefined' && typeof window.__fincalInit === 'function') {
-      window.__fincalInit();
+    if (!markup || typeof window === 'undefined') return;
+
+    const existing = document.getElementById('fincal-legacy-script');
+    if (existing) {
+      if (typeof window.__fincalInit === 'function') window.__fincalInit();
+      return;
     }
-  }, [markup, scriptReady]);
+
+    const script = document.createElement('script');
+    script.id = 'fincal-legacy-script';
+    script.src = `${basePath}/legacy/app.js`;
+    script.async = true;
+    script.onload = () => {
+      if (typeof window.__fincalInit === 'function') window.__fincalInit();
+    };
+    document.body.appendChild(script);
+
+    return () => {
+      script.onload = null;
+    };
+  }, [markup, basePath]);
 
   useEffect(() => {
     if (!showOverlay) {
@@ -110,13 +125,6 @@ export default function CalculatorExperience() {
         </div>
       ) : null}
 
-      {markup ? (
-        <Script
-          src={`${basePath}/legacy/app.js`}
-          strategy="afterInteractive"
-          onLoad={() => setScriptReady(true)}
-        />
-      ) : null}
     </>
   );
 }
