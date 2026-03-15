@@ -8,13 +8,6 @@
 
 > Standard retirement calculators demand a terrifying ₹26,000/month SIP from day one. We help young investors start with an achievable **₹8,500/month** — growing realistically alongside their careers.
 
-## 🔗 Quick Links
-- 🌐 **Live Interactive Demo:** *[Insert Vercel/Deployment Link Here]*
-- 📺 **2-Minute Video Pitch:** *[Insert YouTube Link Here]*
-- 🎨 **UI/UX Design Mockups:** *[Insert Figma Link Here]*
-
----
-
 ## 🎯 The Problem: Why Current Calculators Fail
 Industry-standard retirement tools are mathematically sound but psychologically flawed. They suffer from three critical blind spots:
 
